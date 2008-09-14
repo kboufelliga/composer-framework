@@ -2,136 +2,18 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.lotys.framework.composer</groupId>
+	<groupId>org.composer</groupId>
 	<artifactId>composer</artifactId>
 	<packaging>jar</packaging>
 	<version>0.4</version>
 	<name>composer framework</name>
 	<url>http://maven.apache.org</url>
-<distributionManagement>
+	<distributionManagement>
         <repository>
             <id>cafepress_repo</id>
             <url>dav:http://sourcecontrol.corp.cafepress.com/maven2</url>
         </repository>
     </distributionManagement>
-	<profiles>
-		<profile>
-			<id>dev</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-				<property>
-					<name>dev</name>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-antrun-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>package</id>
-								<phase>process-resources</phase>
-								<configuration>
-									<tasks>
-										<copy todir="target/config">
-											<fileset dir="deploy/config/dev" />
-										</copy>
-										<copy todir="target/bin">
-											<fileset dir="deploy/scripts">
-												<include name="run.*" />
-											</fileset>
-										</copy>
-									</tasks>
-								</configuration>
-								<goals>
-									<goal>run</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>qa</id>
-			<activation>
-				<property>
-					<name>qa</name>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-antrun-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>package</id>
-								<phase>process-resources</phase>
-								<configuration>
-									<tasks>
-										<copy todir="target/config">
-											<fileset dir="deploy/config/qa" />
-										</copy>
-										<copy todir="target/bin">
-											<fileset dir="deploy/scripts">
-												<include name="auth.*" />
-												<include name="charge.*" />
-												<include name="refund.*" />
-											</fileset>
-										</copy>
-									</tasks>
-								</configuration>
-								<goals>
-									<goal>run</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>prod</id>
-			<activation>
-				<property>
-					<name>prod</name>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-antrun-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>package</id>
-								<phase>process-resources</phase>
-								<configuration>
-									<tasks>
-										<copy todir="target/config">
-											<fileset dir="deploy/config/prod" />
-										</copy>
-										<copy todir="target/bin">
-											<fileset dir="deploy/scripts">
-												<include name="auth.*" />
-												<include name="charge.*" />
-												<include name="refund.*" />
-											</fileset>
-										</copy>
-									</tasks>
-								</configuration>
-								<goals>
-									<goal>run</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 	<repositories>
 		<repository>
 			<id>cafepress_repo</id>
@@ -145,6 +27,11 @@
             <id>DataNucleus_Repos2</id>
             <name>DataNucleus Repository</name>
             <url>http://www.datanucleus.org/downloads/maven2</url>
+        </repository>
+		<repository>
+            <id>jena-repo</id>
+            <name>Jena Repository</name>
+            <url>http://jena.hpl.hp.com/repo</url>
         </repository>
     </repositories>
     <pluginRepositories>
@@ -282,7 +169,11 @@
     			<version>7.2</version>
                 <scope>test</scope>
         </dependency>
-
+	    <dependency>
+            <groupId>com.hp.hpl.jena</groupId>
+            <artifactId>jena</artifactId>
+            <version>2.5.6</version>
+        </dependency>
         <!--
         <dependency>
     			<groupId>jdo2</groupId>
