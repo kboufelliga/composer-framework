@@ -164,13 +164,13 @@ public class Main {
             } else if ("update".equals(args[0])) {
                 main.update();
             } else {
-                System.out.println("Usage: Main <task> task Options: \n\t - billing \n\t - payment \n\t - invoicing \n\t - notification ");
+                System.out.println("Usage: Main <task> task Options: \n\t - read \n\t - add \n\t - delete \n\t - update ");
             }
 
             main.shutdown();
 
         } else {
-            System.out.println("Usage: Main <task> task options: \n\t - billing \n\t - payment \n\t - invoicing \n\t - notification ");
+            System.out.println("Usage: Main <task> task Options: \n\t - read \n\t - add \n\t - delete \n\t - update ");
         }
     }
 }
