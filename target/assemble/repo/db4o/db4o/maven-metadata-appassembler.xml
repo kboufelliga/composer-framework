@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?><metadata>
+  <groupId>db4o</groupId>
+  <artifactId>db4o</artifactId>
+  <version>7.2</version>
+  <versioning>
+    <versions>
+      <version>7.2</version>
+    </versions>
+    <lastUpdated>20080924205810</lastUpdated>
+  </versioning>
+</metadata>

@@ -48,7 +48,7 @@
 	</bean>
 
     <!-- aspects -->
-	<bean id="loggingAspect" class="org.composer.aspects.Logging" />
+	<bean id="loggingAspect" class="org.composer.aspects.Monitor" />
 
     <bean id="dataSource" class="org.springframework.jdbc.datasource.SingleConnectionDataSource" destroy-method="destroy">
             <property name="driverClassName" value="net.sourceforge.jtds.jdbc.Driver"/>

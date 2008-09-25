@@ -1,13 +1,15 @@
 package org.composer.beans;
 
-public class RDFBean {
-    private String name;
+import org.composer.interfaces.Entity;
 
-    public String getName() {
-        return name;
+public class RDFBean implements Entity {
+    private String name = null;
+
+    public RDFBean(String name) {
+        this.name = name;
     }
 
-    public void setName(String _name) {
-        this.name = _name;
-    }
+    public String name() {
+		return name;
+	}
 }
