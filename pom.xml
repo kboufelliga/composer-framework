@@ -178,7 +178,6 @@
     			<groupId>db4o</groupId>
     			<artifactId>db4o</artifactId>
     			<version>7.2</version>
-                <scope>test</scope>
         </dependency>
 	    <dependency>
             <groupId>com.hp.hpl.jena</groupId>
@@ -278,7 +277,43 @@
 					          </dependency>
 					        </dependencies>
 					    </plugin>
-
+			<plugin>
+			        <groupId>org.codehaus.mojo</groupId>
+			        <artifactId>appassembler-maven-plugin</artifactId>
+			        <configuration>
+			          <!-- Include etc/ in the beginning of the classpath declaration in the bin scripts -->
+			          <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
+			          <!-- prefix all bin files with "mycompany" -->
+			          <binPrefix>composer</binPrefix>
+			          <!-- set alternative assemble directory -->
+			          <assembleDirectory>${project.build.directory}/assemble</assembleDirectory>
+			          <!-- Extra JVM arguments that will be included in the bin scripts -->
+			          <extraJvmArguments>-Xms128M -Xmx256M -Dpsb.config=config/composer.properties</extraJvmArguments>
+				      <!-- Generate bin scripts for windows and unix pr default -->
+			          <platforms>
+			            <platform>windows</platform>
+			            <platform>unix</platform>
+			          </platforms>
+			          <programs>
+			            <program>
+			              <mainClass>org.composer.Main</mainClass>
+			              <name>composer</name>
+				          <!-- Only generate windows bat script for this application -->
+			              <platforms>
+			                <platform>windows</platform>
+			              </platforms>
+			            </program>
+			            <program>
+			              <mainClass>org.composer.Main</mainClass>
+			              <name>composer</name>
+			              <!-- Only generate unix shell script for this application -->
+			              <platforms>
+			                <platform>unix</platform>
+			              </platforms>
+			            </program>
+			          </programs>
+			        </configuration>
+			      </plugin>
 		</plugins>
 <extensions>
             <extension>
