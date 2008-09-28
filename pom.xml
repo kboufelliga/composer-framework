@@ -3,7 +3,7 @@
 	<groupId>org.composer</groupId>
 	<artifactId>composer</artifactId>
 	<packaging>jar</packaging>
-	<version>0.4-SNAPSHOT</version>
+	<version>0.5-SNAPSHOT</version>
 	<name>composer framework</name>
 
     <url>http://maven.apache.org</url>
