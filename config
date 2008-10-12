@@ -1,0 +1,11 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+[remote "origin"]
+	url = git@github.com:kboufelliga/composer-framework.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+	push = refs/heads/master:refs/heads/master
+[merge]
+	tool = opendiff

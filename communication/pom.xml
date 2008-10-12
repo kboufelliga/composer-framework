@@ -1,0 +1,143 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.composer</groupId>
+		<artifactId>framework</artifactId>
+		<version>0.1-SNAPSHOT</version>
+	</parent> 
+
+	<groupId>org.composer</groupId>
+	<artifactId>communication</artifactId>
+	<packaging>jar</packaging>
+	<version>0.5-SNAPSHOT</version>
+	<name>Composer Framework Communication</name>
+    	<url>http://maven.apache.org</url>
+	<scm>
+	    <connection>scm:git:git://github.com/kboufelliga/composer-framework.git</connection>
+	    <url>scm:git:git://github.com/kboufelliga/composer-framework.git</url>
+	</scm>
+
+    	<distributionManagement>
+        	<repository>
+            		<uniqueVersion>false</uniqueVersion>
+            		<id>googlecode</id>
+	         	<url>svn:https://composer-framework.googlecode.com/svn</url>
+        	</repository>
+    	</distributionManagement>
+
+	<repositories>
+	    	<repository>
+            		<id>don-asf-repository</id>
+            		<url>http://people.apache.org/~mrdon/repository/</url>
+        	</repository>  
+		<repository>
+			<id>cafepress_repo</id>
+			<url>http://sourcecontrol.corp.cafepress.com/maven2</url>
+		</repository>
+		<repository>
+            		<id>jena-repo</id>
+            		<name>Jena Repository</name>
+            		<url>http://jena.hpl.hp.com/repo</url>
+        	</repository>
+	    	<repository>
+            		<id>maven2-repository.dev.java.net</id>
+            		<name>Java.net Repository for Maven</name>
+            		<url>http://download.java.net/maven/2</url>
+	    	</repository>
+        	<repository>
+            		<id>java.net</id>
+            		<url>http://download.java.net/maven/2</url>
+            		<layout>legacy</layout>
+        	</repository>
+        	<repository>
+            		<id>orfjackal</id>
+            		<url>http://repo.orfjackal.net/maven2</url>
+        	</repository>
+    	</repositories>
+
+    	<dependencies>
+        	<dependency>
+            		<groupId>org.composer</groupId>
+            		<artifactId>engine</artifactId>
+            		<version>0.5-SNAPSHOT</version>
+        	</dependency>
+        	<dependency>
+                	<groupId>com.projectdarkstar</groupId>
+                	<artifactId>darkstar-server</artifactId>
+                	<version>0.9.6</version>
+                	<scope>provided</scope>
+            	</dependency>
+            	<dependency>
+                	<groupId>com.projectdarkstar</groupId>
+                	<artifactId>darkstar-client</artifactId>
+                	<version>0.9.6</version>
+                	<scope>provided</scope>
+            	</dependency>
+    	</dependencies>
+
+	<build>
+		<plugins>
+<plugin>
+                                <artifactId>maven-compiler-plugin</artifactId>
+                                <configuration>
+                                        <source>1.5</source>
+                                        <target>1.5</target>
+                                </configuration>
+                        </plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+							<includeScope>runtime</includeScope>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+			        <groupId>org.apache.maven.plugins</groupId>
+			        <artifactId>maven-release-plugin</artifactId>
+			        <dependencies>
+			        	<dependency>
+					        <groupId>org.apache.maven.scm</groupId>
+					        <artifactId>maven-scm-provider-gitexe</artifactId>
+					        <version>1.1-db-1</version>
+					</dependency>
+				 </dependencies>
+			</plugin>
+			<plugin>
+			        <groupId>org.apache.maven.plugins</groupId>
+			        <artifactId>maven-scm-plugin</artifactId>
+			        <dependencies>
+				        <dependency>
+					        <groupId>org.apache.maven.scm</groupId>
+					        <artifactId>maven-scm-provider-gitexe</artifactId>
+						<version>1.1-db-1</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+		</plugins>
+
+		<extensions>
+            		<extension>
+                		<groupId>org.apache.maven.wagon</groupId>
+                		<artifactId>wagon-webdav</artifactId>
+                		<version>1.0-beta-2</version>
+            		</extension>
+			<extension>
+			        <groupId>org.jvnet.wagon-svn</groupId>
+			        <artifactId>wagon-svn</artifactId>
+			        <version>1.8</version>
+			</extension>
+        	</extensions>
+
+	</build>
+</project>

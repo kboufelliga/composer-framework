@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
+<Configure id="Server" class="org.mortbay.jetty.Server">
+  <New id="database" class="org.mortbay.jetty.plus.naming.Resource">
+    <Arg>jdbc/database</Arg>
+    <Arg>
+        <New class="org.postgresql.jdbc3.Jdbc3PoolingDataSource">
+            <Set name="DataSourceName">sandbox database</Set>
+            <Set name="ServerName">localhost</Set>
+            <Set name="DatabaseName">sandbox</Set>
+            <Set name="PortNumber">5444</Set>
+            <Set name="User">sandbox</Set>
+            <Set name="Password">sandbox1111</Set>
+            <Set name="MaxConnections">5</Set>
+            <Set name="InitialConnections">1</Set>
+        </New>
+    </Arg>
+   </New>
+</Configure>

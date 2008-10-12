@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+
+	<!-- enable annotation-based bean configuration -->
+	<context:annotation-config />
+
+	<!-- enable AspectJ annotations -->
+	<aop:aspectj-autoproxy />
+
+	<!-- load application properties -->
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="ignoreResourceNotFound" value="true" />
+
+        <!-- defaults for properties not defined externally -->
+		<property name="properties">
+			<props>
+				<prop key="jdbc.driver">net.sourceforge.jtds.jdbc.Driver</prop>
+                <prop key="jdbc.url">jdbc:jtds:sqlserver://192.168.1.142:1433/db_warehouse</prop>
+                <prop key="db.user">cp_dev</prop>
+                <prop key="db.password">skyisfalling45!</prop>
+            </props>
+		</property>
+	</bean>
+
+    <!-- application components -->
+
+    <bean id="manager" class="org.composer.core.ResourceManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+
+    <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<property name="corePoolSize" value="1" />
+	</bean>
+
+
+    <bean id="main" class="org.composer.Main">
+        <property name="executor" ref="taskExecutor" />
+        <property name="sleepTime" value="1000" />
+    </bean>
+
+    <!-- aspects -->
+	<bean id="loggingAspect" class="org.composer.aspects.Monitor" />
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.SingleConnectionDataSource" destroy-method="destroy">
+            <property name="driverClassName" value="org.postgresql.Driver"/>
+            <property name="url" value="jdbc:postgresql://localhost:5444/sandbox"/>
+            <property name="username" value="sandbox"/>
+            <property name="password" value="sandbox1111"/>
+            <property name="autoCommit" value="true"/>
+            <property name="suppressClose" value="true"/>
+        </bean>
+
+</beans>
