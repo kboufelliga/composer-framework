@@ -1,3 +1,4 @@
+*.svn
 *.iml
 **/target
 .DS_Store

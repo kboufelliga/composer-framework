@@ -7,8 +7,12 @@
 	<groupId>org.composer</groupId>
 	<version>0.1-SNAPSHOT</version>
 	<artifactId>framework</artifactId>
-	<name>Composer Framework</name>
 	<packaging>pom</packaging>
+	<name>Composer Framework</name>
+	<scm>
+        	<connection>scm:git:git://github.com/kboufelliga/composer-framework.git</connection>
+        	<url>scm:git:git://github.com/kboufelliga/composer-framework.git</url>
+	</scm>
 
 	<modules>
 		<module>interfaces</module>
@@ -16,4 +20,46 @@
 		<module>communication</module>
 		<module>services</module>
 	</modules>
+
+	<repositories>
+	    	<repository>
+            		<id>don-asf-repository</id>
+            		<url>http://people.apache.org/~mrdon/repository</url>
+        	</repository>  
+	</repositories>
+
+	<build>
+		<plugins>
+			<plugin>
+		        	<groupId>org.apache.maven.plugins</groupId>
+		        	<artifactId>maven-release-plugin</artifactId>
+		        	<dependencies>
+					<dependency>
+				        	<groupId>org.apache.maven.scm</groupId>
+						<artifactId>maven-scm-provider-gitexe</artifactId>
+				        	<version>1.1-db-1</version>
+				 	</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+		        	<groupId>org.apache.maven.plugins</groupId>
+		        	<artifactId>maven-scm-plugin</artifactId>
+		        	<dependencies>
+					<dependency>
+				        	<groupId>org.apache.maven.scm</groupId>
+						<artifactId>maven-scm-provider-gitexe</artifactId>
+				        	<version>1.1-db-1</version>
+				 	</dependency>
+				</dependencies>
+			</plugin>
+		</plugins>
+		
+		<extensions>
+			<extension>
+		        	<groupId>org.jvnet.wagon-svn</groupId>
+		        	<artifactId>wagon-svn</artifactId>
+		        	<version>1.8</version>
+			</extension>
+        	</extensions>
+	</build>
 </project>
