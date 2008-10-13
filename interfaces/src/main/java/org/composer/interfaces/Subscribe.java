@@ -10,5 +10,5 @@ import java.net.URL;
  * To change this template use File | Settings | File Templates.
  */
 public interface Subscribe {
-    public void service(URL source);
+    public void register(URL source);
 }

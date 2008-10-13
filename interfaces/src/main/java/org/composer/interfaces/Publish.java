@@ -11,5 +11,5 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public interface Publish {
-    public void to(Collection<URL> destinations);
+    public void push(Collection<URL> destinations);
 }
