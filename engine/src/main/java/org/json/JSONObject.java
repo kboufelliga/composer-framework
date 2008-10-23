@@ -24,11 +24,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import java.util.Collection;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
 
 /**
  * A JSONObject is an unordered collection of name/value pairs. Its
@@ -126,7 +128,7 @@ public class JSONObject {
     /**
      * The hash map where the JSONObject's properties are kept.
      */
-    private Hashtable myHashMap;
+    private HashMap myHashMap;
 
 
     /**
@@ -142,7 +144,7 @@ public class JSONObject {
      * Construct an empty JSONObject.
      */
     public JSONObject() {
-        this.myHashMap = new Hashtable();
+        this.myHashMap = new HashMap();
     }
 
 
@@ -227,20 +229,40 @@ public class JSONObject {
      * @param map A map object that can be used to initialize the contents of
      *  the JSONObject.
      */
-    public JSONObject(Hashtable map) {
-        if (map == null) {
-            this.myHashMap = new Hashtable();
-        } else {
-            this.myHashMap = new Hashtable(map.size());
-            Enumeration keys = map.keys();
-            while (keys.hasMoreElements()) {
-                Object key = keys.nextElement();
-                this.myHashMap.put(key, map.get(key));
-            }
-        }
+    public JSONObject(Map map) {
+        this.myHashMap = (map == null) ?
+        	new HashMap() :
+        	new HashMap(map);
     }
+
     
-    
+    /**
+     * Construct a JSONObject from an Object, using reflection to find the
+     * public members. The resulting JSONObject's keys will be the strings
+     * from the names array, and the values will be the field values associated
+     * with those keys in the object. If a key is not found or not visible,
+     * then it will not be copied into the new JSONObject.
+     * @param object An object that has fields that should be used to make a
+     * JSONObject.
+     * @param names An array of strings, the names of the fields to be used
+     * from the object.
+     */
+    public JSONObject(Object object, String names[]) {
+    	this();
+    	Class c = object.getClass();
+    	for (int i = 0; i < names.length; i += 1) {
+    		try {
+    			String name = names[i];
+    			Field field = c.getField(name);
+    			Object value = field.get(object);
+	    		this.put(name, value);
+    		} catch (Exception e) {
+    			/* forget about it */
+    		}
+    	}
+    }
+
+
     /**
      * Construct a JSONObject from a string.
      * This is the most commonly used JSONObject constructor.
@@ -271,7 +293,9 @@ public class JSONObject {
         testValidity(value);
         Object o = opt(key);
         if (o == null) {
-            put(key, value);
+            put(key, value instanceof JSONArray ? 
+            		new JSONArray().put(value) : 
+                    value);
         } else if (o instanceof JSONArray) {
             ((JSONArray)o).put(value);
         } else {
@@ -299,10 +323,10 @@ public class JSONObject {
         if (o == null) {
             put(key, new JSONArray().put(value));
         } else if (o instanceof JSONArray) {
+            put(key, ((JSONArray)o).put(value));
+        } else {
             throw new JSONException("JSONObject[" + key + 
             		"] is not a JSONArray.");
-        } else {
-            put(key, new JSONArray().put(o).put(value));
         }
         return this;
     }
@@ -384,28 +408,14 @@ public class JSONObject {
      */
     public double getDouble(String key) throws JSONException {
         Object o = get(key);
-        if (o instanceof Byte) {
-            return (double) ((Byte)o).byteValue();
-        } else if (o instanceof Short) {
-            return (double) ((Short)o).shortValue();
-        } else if (o instanceof Integer) {
-            return (double) ((Integer)o).intValue();
-        } else if (o instanceof Long) {
-            return (double) ((Long)o).longValue();
-        } else if (o instanceof Float) {
-            return (double) ((Float)o).floatValue();
-        } else if (o instanceof Double) {
-            return ((Double)o).doubleValue();
-        } else if (o instanceof String) {
-            try {
-                return Double.valueOf((String)o).doubleValue();
-            } catch (Exception e) {
-                throw new JSONException("JSONObject[" + quote(key) +
-                    "] is not a number.");
-            }
-        } 
-        throw new JSONException("JSONObject[" + quote(key) +
-            "] is not a number.");
+        try {
+            return o instanceof Number ?
+                ((Number)o).doubleValue() : 
+                Double.valueOf((String)o).doubleValue();
+        } catch (Exception e) {
+            throw new JSONException("JSONObject[" + quote(key) +
+                "] is not a number.");
+        }
     }
 
 
@@ -420,23 +430,8 @@ public class JSONObject {
      */
     public int getInt(String key) throws JSONException {
         Object o = get(key);
-        if (o instanceof Byte) {
-            return ((Byte)o).byteValue();
-        } else if (o instanceof Short) {
-            return ((Short)o).shortValue();
-        } else if (o instanceof Integer) {
-            return ((Integer)o).intValue();
-        } else if (o instanceof Long) {
-            return (int) ((Long)o).longValue();
-        } else if (o instanceof Float) {
-            return (int) ((Float)o).floatValue();
-        } else if (o instanceof Double) {
-            return (int) ((Double)o).doubleValue();
-        } else if (o instanceof String) {
-            return (int) getDouble(key);
-        } 
-        throw new JSONException("JSONObject[" + quote(key) +
-            "] is not a number.");
+        return o instanceof Number ?
+                ((Number)o).intValue() : (int)getDouble(key);
     }
 
 
@@ -487,23 +482,8 @@ public class JSONObject {
      */
     public long getLong(String key) throws JSONException {
         Object o = get(key);
-        if (o instanceof Byte) {
-            return ((Byte)o).byteValue();
-        } else if (o instanceof Short) {
-            return ((Short)o).shortValue();
-        } else if (o instanceof Integer) {
-            return ((Integer)o).intValue();
-        } else if (o instanceof Long) {
-            return ((Long)o).longValue();
-        } else if (o instanceof Float) {
-            return (long) ((Float)o).floatValue();
-        } else if (o instanceof Double) {
-            return (long) ((Double)o).doubleValue();
-        } else if (o instanceof String) {
-            return (long) getDouble(key);
-        } 
-        throw new JSONException("JSONObject[" + quote(key) +
-            "] is not a number.");
+        return o instanceof Number ?
+                ((Number)o).longValue() : (long)getDouble(key);
     }
 
 
@@ -546,8 +526,8 @@ public class JSONObject {
      *
      * @return An iterator of the keys.
      */
-    public Enumeration keys() {
-        return this.myHashMap.keys();
+    public Iterator keys() {
+        return this.myHashMap.keySet().iterator();
     }
 
 
@@ -569,18 +549,29 @@ public class JSONObject {
      */
     public JSONArray names() {
         JSONArray ja = new JSONArray();
-        Enumeration  keys = keys();
-        while (keys.hasMoreElements()) {
-            ja.put(keys.nextElement());
+        Iterator  keys = keys();
+        while (keys.hasNext()) {
+            ja.put(keys.next());
         }
         return ja.length() == 0 ? null : ja;
     }
 
-    
     /**
-     * Shave off trailing zeros and decimal point, if possible.
+     * Produce a string from a Number.
+     * @param  n A Number
+     * @return A String.
+     * @throws JSONException If n is a non-finite number.
      */
-    static public String trimNumber(String s) {
+    static public String numberToString(Number n)
+            throws JSONException {
+        if (n == null) {
+            throw new JSONException("Null pointer");
+        }
+        testValidity(n);
+
+// Shave off trailing zeros and decimal point, if possible.
+
+        String s = n.toString();
         if (s.indexOf('.') > 0 && s.indexOf('e') < 0 && s.indexOf('E') < 0) {
             while (s.endsWith("0")) {
                 s = s.substring(0, s.length() - 1);
@@ -592,20 +583,6 @@ public class JSONObject {
         return s;
     }
 
-    /**
-     * Produce a string from a Number.
-     * @param  n A Number
-     * @return A String.
-     * @throws JSONException If n is a non-finite number.
-     */
-    static public String numberToString(Object n)
-            throws JSONException {
-        if (n == null) {
-            throw new JSONException("Null pointer");
-        }
-        testValidity(n);
-        return trimNumber(n.toString());
-    }
 
     /**
      * Get an optional value associated with a key.
@@ -656,7 +633,7 @@ public class JSONObject {
      * @return		this.
      * @throws JSONException
      */
-    public JSONObject put(String key, Vector value) throws JSONException {
+    public JSONObject put(String key, Collection value) throws JSONException {
         put(key, new JSONArray(value));
         return this;
     }
@@ -689,7 +666,8 @@ public class JSONObject {
     public double optDouble(String key, double defaultValue) {
         try {
             Object o = opt(key);
-            return Double.parseDouble((String)o);
+            return o instanceof Number ? ((Number)o).doubleValue() :
+                new Double((String)o).doubleValue();
         } catch (Exception e) {
             return defaultValue;
         }
@@ -881,7 +859,7 @@ public class JSONObject {
      * @return		this.
      * @throws JSONException
      */
-    public JSONObject put(String key, Hashtable value) throws JSONException {
+    public JSONObject put(String key, Map value) throws JSONException {
         put(key, new JSONObject(value));
         return this;
     }
@@ -982,7 +960,8 @@ public class JSONObject {
                 sb.append("\\r");
                 break;
             default:
-                if (c < ' ') {
+                if (c < ' ' || (c >= '\u0080' && c < '\u00a0') || 
+                		       (c >= '\u2000' && c < '\u2100')) {
                     t = "000" + Integer.toHexString(c);
                     sb.append("\\u" + t.substring(t.length() - 4));
                 } else {
@@ -1015,7 +994,7 @@ public class JSONObject {
             if (o instanceof Double) {
                 if (((Double)o).isInfinite() || ((Double)o).isNaN()) {
                     throw new JSONException(
-                        "JSON does not allow non-finite numbers");
+                        "JSON does not allow non-finite numbers.");
                 }
             } else if (o instanceof Float) {
                 if (((Float)o).isInfinite() || ((Float)o).isNaN()) {
@@ -1060,14 +1039,14 @@ public class JSONObject {
      */
     public String toString() {
         try {
-            Enumeration keys = keys();
+            Iterator     keys = keys();
             StringBuffer sb = new StringBuffer("{");
 
-            while (keys.hasMoreElements()) {
+            while (keys.hasNext()) {
                 if (sb.length() > 1) {
                     sb.append(',');
                 }
-                Object o = keys.nextElement();
+                Object o = keys.next();
                 sb.append(quote(o.toString()));
                 sb.append(':');
                 sb.append(valueToString(this.myHashMap.get(o)));
@@ -1116,19 +1095,19 @@ public class JSONObject {
         if (n == 0) {
             return "{}";
         }
-        Enumeration keys = keys();
+        Iterator     keys = keys();
         StringBuffer sb = new StringBuffer("{");
         int          newindent = indent + indentFactor;
         Object       o;
         if (n == 1) {
-            o = keys.nextElement();
+            o = keys.next();
             sb.append(quote(o.toString()));
             sb.append(": ");
             sb.append(valueToString(this.myHashMap.get(o), indentFactor,
                     indent));
         } else {
-            while (keys.hasMoreElements()) {
-                o = keys.nextElement();
+            while (keys.hasNext()) {
+                o = keys.next();
                 if (sb.length() > 1) {
                     sb.append(",\n");
                 } else {
@@ -1186,10 +1165,8 @@ public class JSONObject {
 	        }
             throw new JSONException("Bad value from toJSONString: " + o);
         }
-        if (value instanceof Float || value instanceof Double ||
-            value instanceof Byte || value instanceof Short || 
-            value instanceof Integer || value instanceof Long) {
-            return numberToString(value);
+        if (value instanceof Number) {
+            return numberToString((Number) value);
         }
         if (value instanceof Boolean || value instanceof JSONObject ||
                 value instanceof JSONArray) {
@@ -1228,10 +1205,8 @@ public class JSONObject {
         } catch (Exception e) {
         	/* forget about it */
         }
-        if (value instanceof Float || value instanceof Double ||
-            value instanceof Byte || value instanceof Short || 
-            value instanceof Integer || value instanceof Long) {
-            return numberToString(value);
+        if (value instanceof Number) {
+            return numberToString((Number) value);
         }
         if (value instanceof Boolean) {
             return value.toString();
@@ -1258,14 +1233,14 @@ public class JSONObject {
      public Writer write(Writer writer) throws JSONException {
         try {
             boolean  b = false;
-            Enumeration keys = keys();
+            Iterator keys = keys();
             writer.write('{');
 
-            while (keys.hasMoreElements()) {
+            while (keys.hasNext()) {
                 if (b) {
                     writer.write(',');
                 }
-                Object k = keys.nextElement();
+                Object k = keys.next();
                 writer.write(quote(k.toString()));
                 writer.write(':');
                 Object v = this.myHashMap.get(k);

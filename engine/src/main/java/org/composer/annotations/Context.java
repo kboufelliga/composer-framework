@@ -14,5 +14,7 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
 @Inherited
 public @interface Context {
-	String value() default "framework";
+	String[] value() default {};
+    String name() default "context";
+    String uri() default "/context";
 }

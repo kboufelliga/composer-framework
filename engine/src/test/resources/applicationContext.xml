@@ -39,7 +39,8 @@
     </bean>
 
     <!-- aspects -->
-	<bean id="monitorAspect" class="org.composer.aspects.Monitor" />
+	<bean id="monitorAspect" class="org.composer.aspects.Logging" />
+    <bean id="annotationManager" class="org.composer.aspects.ResourceDomain" />
 
     <bean id="dataSource" class="org.springframework.jdbc.datasource.SingleConnectionDataSource" destroy-method="destroy">
             <property name="driverClassName" value="org.postgresql.Driver"/>

@@ -14,5 +14,8 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
 @Inherited
 public @interface Domain {
-	String value() default "composer";
+	String[] value() default {};
+    String name() default "domain";
+    String uri() default "/domain";
+
 }

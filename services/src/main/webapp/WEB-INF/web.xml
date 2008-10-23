@@ -3,21 +3,56 @@
  "http://java.sun.com/dtd/web-app_2_3.dtd" >
 
 <web-app>
-  <display-name>Archetype Created Web Application</display-name>
+    <display-name>Archetype Created Web Application</display-name>
+
+    <filter>
+        <filter-name>GzipFilter</filter-name>
+        <filter-class>org.mortbay.servlet.jetty.IncludableGzipFilter</filter-class>
+        <init-param>
+          <param-name>bufferSize</param-name>
+          <param-value>8192</param-value>
+        </init-param>
+        <init-param>
+          <param-name>minGzipSize</param-name>
+          <param-value>1024</param-value>
+        </init-param>
+        <init-param>
+          <param-name>userAgent</param-name>
+          <param-value>(?:Mozilla[^\(]*\(compatible;\s*+([^;]*);.*)|(?:.*?([^\s]+/[^\s]+).*)</param-value>
+        </init-param>
+        <init-param>
+          <param-name>cacheSize</param-name>
+          <param-value>1024</param-value>
+        </init-param>
+        <init-param>
+          <param-name>excludedAgents</param-name>
+          <param-value>MSIE 6.0</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>GzipFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
     <servlet>
-        <servlet-name>Composer Jersey Test</servlet-name>
+        <servlet-name>ComposerJersey</servlet-name>
         <servlet-class>com.sun.jersey.impl.container.servlet.ServletAdaptor</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>Composer Jersey Test</servlet-name>
+        <servlet-name>ComposerJersey</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
+
     <resource-ref>
-    <description>Database Reference</description>
-    <res-ref-name>jdbc/database</res-ref-name>
-    <res-type>javax.sql.DataSource</res-type>
-    <res-auth>Container</res-auth>
-</resource-ref>
+            <description>Database Reference</description>
+            <res-ref-name>jdbc/database</res-ref-name>
+            <res-type>javax.sql.DataSource</res-type>
+            <res-auth>Container</res-auth>
+    </resource-ref>
+
 </web-app>
+
+

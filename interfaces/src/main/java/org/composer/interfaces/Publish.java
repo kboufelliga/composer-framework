@@ -1,5 +1,8 @@
 package org.composer.interfaces;
 
+import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
+
 import java.net.URL;
 import java.util.Collection;
 
@@ -11,5 +14,5 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public interface Publish {
-    public void push(Collection<URL> destinations);
+    public void publish(URL destination, Resource resource);
 }

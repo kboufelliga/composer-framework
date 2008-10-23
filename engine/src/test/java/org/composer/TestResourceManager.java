@@ -36,15 +36,17 @@ public class TestResourceManager {
     }
 
     public void testQuery() {
-        resourceManager.query(new ByteArrayOutputStream());
+        resourceManager.search("register",new ByteArrayOutputStream());
     }
 
+    @Domain("cafepress")
+    @Context("web3.0")
     public void testPrintAll() {
             resourceManager.printAll();
     }
 
     public void testCreate(String resourceName) {
-        resourceManager.create(resourceName);
+        resourceManager.addResourceName(resourceName);
     }
 
     @org.junit.Test
@@ -52,7 +54,7 @@ public class TestResourceManager {
         ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext("applicationContext.xml");
     	final TestResourceManager main = (TestResourceManager)appContext.getBean("main");
 
-        //testCreate("registry-web3.0");
+        testCreate("registry-web3.0");
 
         testPrintAll();
 

@@ -2,13 +2,14 @@ package org.composer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.composer.core.EntityStore;
+
 import java.util.*;
 import com.sun.jersey.api.container.grizzly.GrizzlyWebContainerFactory;
 import com.sun.grizzly.http.SelectorThread;
 
 public class Main {
     private Log log = LogFactory.getLog(Main.class);
-
 
     public static void main(String[] args) throws Exception {
         final String baseUri = "http://localhost:9998/";
