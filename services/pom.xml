@@ -86,15 +86,15 @@
                 <configuration>
                     <jettyConfig>${basedir}/config/jetty.xml</jettyConfig>
                             <connectors>
-                        <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
+                            <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
                             <port>9111</port>
                             <maxIdleTime>60000</maxIdleTime>
                         </connector>
                     </connectors>
-                    <!--<webAppConfig>
-                                       <contextPath>/demo</contextPath>
-                                       <compactPath>true</compactPath>
-                                </webAppConfig>  -->
+                    <webAppConfig>
+                       <contextPath>/services</contextPath>
+                       <compactPath>true</compactPath>
+                    </webAppConfig>
                 </configuration>
             </plugin>
         </plugins>
