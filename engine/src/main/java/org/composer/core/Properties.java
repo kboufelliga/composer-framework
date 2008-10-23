@@ -8,44 +8,59 @@ package org.composer.core;
  * To change this template use File | Settings | File Templates.
  */
 public enum Properties {
-        PUBLISH("publish") {
+        PUBLISH_URL("publish") {
             String value() {
-                return "http://publish.composerlab.org/";
+                return "http://publish.composerlab.org";
             }
         },
-        SUBSCRIBE("subscribe") {
+        PUBLISH_URI("publish") {
             String value() {
-                return "http://subscribe.composerlab.org/";
+                return "/publishing";
             }
         },
-        IMPORT("import") {
+        SUBSCRIBE_URL("subscribe") {
             String value() {
-                return "http://import.composerlab.org/";
+                return "http://subscribe.composerlab.org";
             }
         },
-        EXPORT("export") {
+        IMPORT_URL("import") {
             String value() {
-                return "http://export.composerlab.org/";
+                return "http://import.composerlab.org";
             }
         },
-        TRANSFORM("transform") {
+        EXPORT_URL("export") {
             String value() {
-                return "http://transform.composerlab.org/";
+                return "http://export.composerlab.org";
             }
         },
-        SCHEMA("schema") {
+        TRANSFORM_URL("transform") {
             String value() {
-                return "http://schema.composerlab.org/elements/1.0/";
+                return "http://transform.composerlab.org";
             }
         },
-        RELATIONSHIP_URI("relationship") {
+        SCHEMA_URL("schema") {
             String value() {
-                return "http://purl.org/vocab/relationship/";
+                return "http://schema.composerlab.org";
             }
         },
-        SITE("site") {
+        SCHEMA_URI("schema") {
             String value() {
-                return "http://composerlab.org/";
+                return "/elements/0.1";
+            }
+        },
+        RELATIONSHIP_URL("Relationship URL") {
+            String value() {
+                return "http://purl.org";
+            }
+        },
+        RELATIONSHIP_URI("Relationship URI") {
+            String value() {
+                return "/vocab/relationship";
+            }
+        },
+        DEFAULT_URL("repository") {
+            String value() {
+                return "http://composerlab.org";
             }
         },
         DEFAULT_DOMAIN_PREFIX("Default Domain Prefix") {
@@ -60,22 +75,32 @@ public enum Properties {
         },
         DEFAULT_DOMAIN_URI("Default Domain URI") {
             String value() {
-                return "http://composerlab.org/domain";
+                return "/domain";
             }
         },
         DEFAULT_CONTEXT_URI("Default Context URI") {
             String value() {
-                return "http://composerlab.org/context";
+                return "/context";
             }
         },
         DEFAULT_MODEL_NAME("Default Jena Model Name") {
             String value() {
-                return "prototype";
+                return "prototype-0.1";
             }
         },
         DEFAULT_INTERNAL_DBNAME("Default Internal DB Name") {
             String value() {
-                return "composer.db";
+                return "composer-0.6.db";
+            }
+        },
+        TYPE_JENA_RESOURCE("JENA Resource") {
+            String value() {
+                return "resource";
+            }
+        },
+        TYPE_JENA_STATEMENT("JENA Statement") {
+            String value() {
+                return "statement";
             }
         };
 

@@ -3,22 +3,11 @@ package org.composer.core;
 import org.springframework.jdbc.core.simple.SimpleJdbcDaoSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.composer.beans.RDFEntity;
+import org.composer.utils.KeyGen;
 
-import org.composer.beans.*;
-import org.composer.core.Properties;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.io.*;
 
-import com.db4o.ObjectContainer;
-import com.db4o.ObjectSet;
-import com.db4o.Db4o;
-import com.db4o.query.Query;
-import com.db4o.query.Evaluation;
-import com.db4o.query.Candidate;
 import com.hp.hpl.jena.rdf.model.*;
 import com.hp.hpl.jena.db.DBConnection;
 import com.hp.hpl.jena.db.IDBConnection;
@@ -27,67 +16,76 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.shared.AlreadyExistsException;
+
+import javax.sql.DataSource;
+
 
 /**
  *
- * @User:kboufelliga <Create Date: Sep 6, 2008>
+ * User:kboufelliga - Create Date: Sep 6, 2008 -
  */
-public class ResourceManager extends SimpleJdbcDaoSupport {
+public final class ResourceManager extends SimpleJdbcDaoSupport {
     private static Log log = LogFactory.getLog(ResourceManager.class);
 
     private static final ResourceManager INSTANCE = new ResourceManager();
+    private static EntityStore entityStore;
 
-    private static ObjectContainer database;
-    private static Map<Object,Pair> prefixLookup = new HashMap<Object,Pair>();
     private Model model;
-
+    private static String domainUrl = Properties.DEFAULT_URL.value()+Properties.DEFAULT_DOMAIN_URI.value();
+    private static String contextUrl = Properties.DEFAULT_URL.value()+Properties.DEFAULT_CONTEXT_URI.value();
 
     private static String domainPrefix = Properties.DEFAULT_DOMAIN_PREFIX.value();
     private static String contextPrefix = Properties.DEFAULT_CONTEXT_PREFIX.value();
     private static String domainUri = Properties.DEFAULT_DOMAIN_URI.value();
     private static String contextUri = Properties.DEFAULT_CONTEXT_URI.value();
-    private static String defaultSite = Properties.SITE.value();
-    private static String publishSite = Properties.PUBLISH.value();
-    private static String importSite = Properties.IMPORT.value();
-    private static String exportSite = Properties.EXPORT.value();
-    private static String subscribeSite = Properties.SUBSCRIBE.value();
-    private static String transformSite = Properties.TRANSFORM.value();
+    private static String defaultUrl = Properties.DEFAULT_URL.value();
+    private static String relationshipUrl = Properties.RELATIONSHIP_URL.value();
     private static String relationshipUri = Properties.RELATIONSHIP_URI.value();
     private static String modelName = Properties.DEFAULT_MODEL_NAME.value();
 
+    private static Publisher publisher;
+
     private ResourceManager() {
-        this.database = Db4o.openFile(Properties.DEFAULT_INTERNAL_DBNAME.value());
-        loadPrefixLookup();
+        ResourceManager.entityStore = EntityStore.INSTANCE;
+        ResourceManager.entityStore.initialize();
     }
 
     public static ResourceManager getInstance() {
-        return INSTANCE;
+            return INSTANCE;
     }
 
-    private void loadPrefixLookup() {
-        Query query = database.query();
-        query.constrain(PrefixMapping.class);
+    public static void setDomain(String domainPrefix, String domainUri) {
+        ResourceManager.domainPrefix = domainPrefix;
+        ResourceManager.domainUri = domainUri;
+        ResourceManager.domainUrl = defaultUrl+domainUri;
 
-        ObjectSet<Pair> pairSet = query.execute();
-
-
-        while (pairSet.hasNext()) {
-            Pair pair = pairSet.next();
-            prefixLookup.put(pair.getLeft(),pair);
+        if (!entityStore.lookupKey(domainPrefix)) {
+            entityStore.get(domainPrefix,domainUri);
+        } else {
+            RDFEntity entity = (RDFEntity)entityStore.get(domainPrefix,domainUri);
+            if (!entity.getUri().equals(domainUri)) {
+                entityStore.update(domainPrefix,domainUri);
+            }
         }
     }
 
     public static void setDomain(String domainPrefix) {
-        setDomain(domainPrefix,domainUri);
+            setDomain(domainPrefix,domainUri);
     }
 
-    public static void setDomain(String domainPrefix, String domainUrl) {
-        ResourceManager.domainPrefix = domainPrefix;
-        
-        if (!prefixLookup.containsKey(domainPrefix)) {
-            storePrefixMapping(domainPrefix,domainUrl);
+    public static void setContext(String contextPrefix, String contextUri) {
+        ResourceManager.contextPrefix = contextPrefix;
+        ResourceManager.contextUri = contextUri;
+        ResourceManager.contextUrl = defaultUrl+contextUri;
+
+        if (!entityStore.lookupKey(contextPrefix)) {
+            entityStore.get(contextPrefix,contextUri);
+        }  else {
+            RDFEntity entity = (RDFEntity)entityStore.get(contextPrefix,contextUri);
+            if (!entity.getUri().equals(contextUri)) {
+                entityStore.update(contextPrefix,contextUri);
+            }
         }
     }
 
@@ -95,59 +93,12 @@ public class ResourceManager extends SimpleJdbcDaoSupport {
         setContext(contextPrefix,contextUri);
     }
 
-    public static void setContext(String contextPrefix, String contextUrl) {
-        ResourceManager.contextPrefix = contextPrefix;
-        
-        if (!prefixLookup.containsKey(contextPrefix)) {
-            storePrefixMapping(contextPrefix,contextUrl);
-        }
-    }
-
-    public static void setPublishSite(String publishSite) {
-        ResourceManager.publishSite = publishSite;
-    }
-
-    public static void setImportSite(String importSite) {
-        ResourceManager.importSite = importSite;
-    }
-
-    public static void setExportSite(String exportSite) {
-        ResourceManager.exportSite = exportSite;
-    }
-
-    public static void setSubscribeSite(String subscribeSite) {
-        ResourceManager.subscribeSite = subscribeSite;
-    }
-
-    public static void setTransformSite(String transformSite) {
-        ResourceManager.transformSite = transformSite;
+    public static void setPublisher(Publisher publisher) {
+        ResourceManager.publisher = publisher;
     }
 
     public static void setModelName(String modelName) {
         ResourceManager.modelName = modelName;
-    }
-
-    
-    private static void storePrefixMapping(String name, String value) {
-        Pair pair = Pair.create(name,value);
-
-        //store in local db
-        dbStorePrefixMapping(pair);
-
-        //store in memory
-        prefixLookup.put(domainPrefix,pair);
-
-    }
-
-    private static void dbStorePrefixMapping(Pair pair) {
-        try {
-            database.store(pair);
-            database.commit();
-        } catch (Exception e) {
-            log.error("could not store prefix mapping pair: "+e);
-        } finally {
-            database.close();
-        }
     }
 
     public boolean read(Resource resource) {
@@ -164,24 +115,12 @@ public class ResourceManager extends SimpleJdbcDaoSupport {
 
     public void printAll() {
         log.info("reading from domain: "+domainPrefix);
-        model = getModel("prototypeRdf");
+        model = getModel(modelName);
 
         StmtIterator iterator = model.listStatements();
         while (iterator.hasNext()) {
             System.out.println(iterator.nextStatement().toString());
         }
-    }
-
-    private static String getDomainUri(String prefix) {
-        log.info("getting entity for prefix "+prefix);
-
-        if (prefixLookup.containsKey(prefix)) {
-            Pair<String,String> pair = prefixLookup.get(prefix);
-
-            return pair.getLeft();
-        }
-
-        return domainUri;
     }
 
     // bind the context to the domain in a meaningfull way
@@ -190,38 +129,174 @@ public class ResourceManager extends SimpleJdbcDaoSupport {
        OntModel ontology = ModelFactory.createOntologyModel();
     }
 
-    public void query(OutputStream out) {
-        String queryString =
-        "PREFIX relationship: <"+ relationshipUri +"> " +
-        "PREFIX site: <"+defaultSite+"> " +
-        "SELECT ?context " +
-        "WHERE {" +
-	    "      ?context relationship:domain site:cafepress . " +
-	    "      }";
+    public boolean ask(String resourceName, String propertyName, String propertyValue) {
+        boolean response = false;
+        String askString =
+        "PREFIX relationship: <"+relationshipUrl+relationshipUri+"/property#"+propertyName+"> " +
+        "PREFIX site: <"+defaultUrl+domainUri+contextUri+"/"+resourceName+"> " +
+        "ASK " +
+        "{" +
+        "     site: relationship: ?"+propertyName+" " +
+        "     FILTER(?"+propertyName+" = \""+propertyValue+"\") " +
+        "}";
 
-        IDBConnection dbconnection = new DBConnection(super.getConnection(),"PostgreSQL");
-        ModelMaker modelMaker = ModelFactory.createModelRDBMaker(dbconnection);
-        Model model = modelMaker.openModel("prototypeRdf");
+        com.hp.hpl.jena.query.Query query = QueryFactory.create(askString);
+
+        QueryExecution qe = QueryExecutionFactory.create(query, getModel(modelName));
+
+        response = qe.execAsk();
+
+        qe.close();
+
+        return response;
+    }
+
+    public void search(String resourceName, String relationship, OutputStream out) {
+        String queryString =
+        "PREFIX relationship: <"+ relationship +"> " +
+        "PREFIX site: <"+ defaultUrl+domainUri+contextUri+"> " +
+        "SELECT ?name " +
+        "WHERE {" +
+        "           ?name relationship: \"userId\" . " +
+        "      }";
+
         com.hp.hpl.jena.query.Query query = QueryFactory.create(queryString);
 
-        QueryExecution qe = QueryExecutionFactory.create(query, model);
+        QueryExecution qe = QueryExecutionFactory.create(query, getModel(modelName));
         com.hp.hpl.jena.query.ResultSet results = qe.execSelect();
 
         ResultSetFormatter.outputAsJSON(out,results);
 
-        System.out.println("out :"+out.toString());
+        System.out.println("properties: "+out.toString());
 
         qe.close();
 
     }
 
-    private Model getModel() {
-        if (model == null) {
-            model = ModelFactory.createDefaultModel();
+    public void search(String resourceName, OutputStream out) {
+        String queryString =
+        "PREFIX relationship: <"+ relationshipUrl+relationshipUri+"/domain"+domainUri+"> " +
+        "PREFIX site: <"+ defaultUrl+domainUri+"/> " +
+        "SELECT ?"+resourceName+" ?context " +
+        "WHERE {" +
+	    "           ?"+resourceName+" relationship: ?context . " +
+	    "      }";
+
+        com.hp.hpl.jena.query.Query query = QueryFactory.create(queryString);
+
+        QueryExecution qe = QueryExecutionFactory.create(query, getModel(modelName));
+        com.hp.hpl.jena.query.ResultSet results = qe.execSelect();
+
+        ResultSetFormatter.outputAsJSON(out,results);
+
+        System.out.println(out.toString());
+
+        qe.close();
+
+    }
+
+    public void addPropertyValue(String modelName, String resourceName, String propertyName, String propertyValue)   {
+        model = getModel(modelName);
+
+        model.begin();
+
+        Resource resource = model.getResource(defaultUrl+domainUri+contextUri+"/"+resourceName);
+        Property resourceProperty = model.createProperty(relationshipUrl+relationshipUri+"/property#",propertyName);
+
+        resource.addProperty(resourceProperty,propertyName);
+
+        Statement statement = model.createStatement(resource,resourceProperty,propertyValue);
+        log.info("........................ create property statement: "+resource.toString());
+
+        model.add(statement);
+
+        model.commit();
+    }
+
+    public void addPropertyName(String modelName, String resourceName, String propertyName)   {
+        model = getModel(modelName);
+
+        model.begin();
+
+        Resource resource = model.getResource(defaultUrl+domainUri+contextUri+"/"+resourceName);
+        Property resourceProperty = model.createProperty(relationshipUrl+relationshipUri+"/property#",propertyName);
+
+        resource.addProperty(resourceProperty,propertyName);
+
+        Statement statement = model.createStatement(resource,resourceProperty,propertyName);
+        log.info("........................ create property statement: "+resource.toString());
+
+        model.add(statement);
+
+        model.commit();
+    }
+
+    public void addResourceName(String modelName, String resourceName)   {
+        model = getModel(modelName);
+
+        model.begin();
+        log.info(".............. DEFAULT URL: "+defaultUrl);
+        log.info("............... DOMAIN URL: "+domainUrl);
+        log.info("............... DOMAIN URI: "+domainUri);
+        log.info("...............CONTEXT URI: "+contextUri);
+                                                
+        Resource resourceDomain = model.createResource(defaultUrl+domainUri);
+        Resource resourceContext = model.createResource(defaultUrl+domainUri+contextUri);
+
+        Resource resource = model.createResource(domainUrl+"/"+resourceName);
+        Property contextProperty = model.createProperty(relationshipUrl+relationshipUri+"/context",contextUri);
+        Property domainProperty = model.createProperty(relationshipUrl+relationshipUri+"/domain",domainUri);
+
+        resource.addProperty(domainProperty,resourceContext);
+
+        Statement statement = model.createStatement(resourceContext,domainProperty,resourceDomain);
+
+        model.add(statement);
+
+        model.commit();
+    }
+
+    public void addResourceName(String resourceName) {
+        addResourceName(modelName,resourceName);
+    }
+
+    public void addProperty(String resourceName, String propertyName) {
+        addPropertyName(modelName,resourceName,"property#"+propertyName);
+
+    }
+
+    public void getProperty(String resourceName, String propertyName) {
+
+    }
+
+    public String register(String resourceName, String registrationType) {
+        String key = "";
+        if (registrationType.equals("appName")) {
+            //generate a unique key
+            key = KeyGen.generateKey();
+            addPropertyValue(modelName,resourceName,registrationType,resourceName);
+            addPropertyValue(modelName,resourceName,resourceName+".appKey",key);
         }
 
-        return model;
+        return key;
     }
+
+    public String registerAppUser(String appName, String userId) {
+        String key = "";
+
+            key = KeyGen.generateShortKey();
+            addPropertyValue(modelName,appName,"userId",userId);
+            addPropertyValue(modelName,appName,userId+".userKey",key);
+
+        return key;
+    }
+    
+    public OutputStream properties(String resourceName) {
+        OutputStream output = new ByteArrayOutputStream();
+        search(resourceName,relationshipUrl+relationshipUri+"/property#userId",output);
+        return output;
+    }
+
 
     private Model getModel(String name) {
         ResourceManager.setModelName(name);
@@ -238,29 +313,5 @@ public class ResourceManager extends SimpleJdbcDaoSupport {
         }
 
         return model;
-    }
-
-    public void create(String modelName, String resourceName)   {
-        model = getModel(modelName);
-
-        model.begin();
-        Resource dbresourceDomain = model.createResource(domainUri);
-        Resource dbresourceContext = model.createResource(contextUri);
-
-        Resource dbresource = model.createResource(relationshipUri+resourceName);
-        Property dbcontextProperty = model.createProperty(relationshipUri,"context");
-        Property dbdomainProperty = model.createProperty(relationshipUri,"domain");
-
-        dbresource.addProperty(dbcontextProperty,dbresourceContext);
-
-        Statement dbstatement = model.createStatement(dbresourceContext,dbdomainProperty,dbresourceDomain);
-
-        model.add(dbstatement);
-
-        model.commit();
-    }
-
-    public void create(String resourceName) {
-        create(modelName,resourceName);
     }
 }

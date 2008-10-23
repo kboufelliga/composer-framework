@@ -1,7 +1,5 @@
 package org.json;
 
-import java.io.StringWriter;
-
 /*
 Copyright (c) 2006 JSON.org
 
@@ -25,6 +23,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
+import java.io.StringWriter;
 
 /**
  * JSONStringer provides a quick and convenient way of producing JSON text.
@@ -73,6 +73,6 @@ public class JSONStringer extends JSONWriter {
      * @return The JSON text.
      */
     public String toString() {
-      return this.mode == 'd' ? this.writer.toString() : null;
+        return this.mode == 'd' ? this.writer.toString() : null;
     }
 }

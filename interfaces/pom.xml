@@ -12,6 +12,11 @@
 	<version>0.5-SNAPSHOT</version>
 	<name>Composer Framework Interfaces</name>
 	<repositories>
+        <repository>
+                <id>composerlab-thirdparty</id>
+                <name>Composer Third Party Repository</name>
+                <url>http://maven.composerlab.org/content/groups/public/</url>
+        </repository>                
 		<repository>
             		<id>jena-repo</id>
             		<name>Jena Repository</name>
