@@ -14,6 +14,10 @@ import javax.sql.DataSource;
 
 import junit.framework.TestCase;
 
+import java.util.Properties;
+import java.io.IOException;
+import java.io.FileInputStream;
+
 /**
  * Created by IntelliJ IDEA.
  * User: kboufelliga
@@ -24,7 +28,7 @@ import junit.framework.TestCase;
 @Domain("class.cafepress,/classes/cafepress#testbasic")
 @Context("web3.0")
 public class TestBasic extends TestCase {
-    private Log log = LogFactory.getLog(TestBasic.class);
+    private static Log log = LogFactory.getLog(TestBasic.class);
     private ResourceManager resourceManager = ResourceManager.getInstance();
 
     public TestBasic() {
@@ -32,10 +36,19 @@ public class TestBasic extends TestCase {
     }
     public static DataSource getDataSource() {
         BasicDataSource ds = new BasicDataSource();
-        ds.setDriverClassName("org.postgresql.Driver");
-        ds.setUsername("sandbox");
-        ds.setPassword("sandbox1111");
-        ds.setUrl("jdbc:postgresql://localhost:5444/sandbox");
+        Properties props = new Properties();
+        try {
+            props.load(new FileInputStream("datasource.properties"));
+
+            ds.setDriverClassName(props.getProperty("className"));
+            ds.setUsername(props.getProperty("username"));
+            ds.setPassword(props.getProperty("password"));
+            ds.setUrl(props.getProperty("url"));
+
+        } catch (IOException ioe) {
+            log.error("Loading DataSource Properties exception: "+ioe);
+
+        }
         return ds;
     }
 
