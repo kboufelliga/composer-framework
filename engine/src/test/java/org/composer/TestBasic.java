@@ -7,10 +7,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.PropertiesConfiguration;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import com.db4o.ObjectContainer;
 
 import javax.sql.DataSource;
+import javax.naming.InitialContext;
 
 import junit.framework.TestCase;
 
@@ -32,26 +35,24 @@ public class TestBasic extends TestCase {
     private ResourceManager resourceManager = ResourceManager.getInstance();
 
     public TestBasic() {
-        resourceManager.setDataSource(getDataSource());
-    }
-    public static DataSource getDataSource() {
-        BasicDataSource ds = new BasicDataSource();
-        Properties props = new Properties();
         try {
-            props.load(new FileInputStream("datasource.properties"));
+              //InitialContext ctxt = new InitialContext();
+            //DataSource ds = (DataSource) ctxt.lookup("kboufelliga/ds/Postgresql");
 
-            ds.setDriverClassName(props.getProperty("className"));
-            ds.setUsername(props.getProperty("username"));
-            ds.setPassword(props.getProperty("password"));
-            ds.setUrl(props.getProperty("url"));
+            BasicDataSource ds = new BasicDataSource();
+            Configuration config = new PropertiesConfiguration("datasource.properties");
 
-        } catch (IOException ioe) {
-            log.error("Loading DataSource Properties exception: "+ioe);
-
+            ds.setDriverClassName(config.getString("className"));
+            ds.setUsername(config.getString("username"));
+            ds.setPassword(config.getString("password"));
+            ds.setUrl(config.getString("url"));
+            
+            resourceManager.setDataSource(ds);
+        } catch (Exception e) {
+            log.error("datasource set up failed "+e);
         }
-        return ds;
     }
-
+    
     @Domain(name="cafepress",uri="/cp/tests")
     public void testProperties() {
             resourceManager.properties("register");
