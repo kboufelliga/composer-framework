@@ -16,26 +16,12 @@
 	<!-- load application properties -->
 	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="ignoreResourceNotFound" value="true" />
-
-        <!-- defaults for properties not defined externally -->
-		<property name="properties">
-			<props>
-				<prop key="jdbc.driver">net.sourceforge.jtds.jdbc.Driver</prop>
-                <prop key="jdbc.url">jdbc:jtds:sqlserver://192.168.1.142:1433/db_warehouse</prop>
-                <prop key="db.user">cp_dev</prop>
-                <prop key="db.password">skyisfalling45!</prop>
-            </props>
-		</property>
 	</bean>
 
     <!-- application components -->
 
-    <bean id="manager" class="org.composer.core.ResourceManager" factory-method="getInstance">
+    <bean id="main" class="org.composer.TestSpring">
         <property name="dataSource" ref="dataSource" />
-    </bean>
-
-
-    <bean id="main" class="org.composer.TestResourceManager">
     </bean>
 
     <!-- aspects -->
@@ -44,9 +30,9 @@
 
     <bean id="dataSource" class="org.springframework.jdbc.datasource.SingleConnectionDataSource" destroy-method="destroy">
             <property name="driverClassName" value="org.postgresql.Driver"/>
-            <property name="url" value="jdbc:postgresql://localhost:5444/sandbox"/>
-            <property name="username" value="sandbox"/>
-            <property name="password" value="sandbox1111"/>
+            <property name="url" value="jdbc:postgresql://localhost:5432/composer"/>
+            <property name="username" value="composer"/>
+            <property name="password" value="composer1111"/>
             <property name="autoCommit" value="true"/>
             <property name="suppressClose" value="true"/>
         </bean>

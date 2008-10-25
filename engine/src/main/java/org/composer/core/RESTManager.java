@@ -82,7 +82,6 @@ public class RESTManager {
     @Domain(name="cptests",uri="/cp/tests")
     public String create(@PathParam("resourceName") String resourceName) {
         log.info("processing request to add resource name: "+resourceName);
-        System.out.println("........................................RESOURCE NAME: "+resourceName);
 
         URI uri =  uriInfo.getAbsolutePath();
 
@@ -106,7 +105,7 @@ public class RESTManager {
             try {
                 jsonResp.put("appName",appName);
                 jsonResp.put("info","");
-                jsonResp.put("error","Apllication "+appName+" already registered!");
+                jsonResp.put("error","Application \""+appName+"\" already registered!");
             } catch (Exception e){
                 log.error("JSON Exception: "+e);
             }
@@ -144,7 +143,7 @@ public class RESTManager {
                 jsonResp.put("userId",userId);
                 jsonResp.put("appName",appName);
                 jsonResp.put("info","");
-                jsonResp.put("error","Apllication "+appName+" does not exist!");
+                jsonResp.put("error","Application \""+appName+"\" does not exist!");
             } catch (Exception e){
                 log.error("JSON Exception: "+e);
             }

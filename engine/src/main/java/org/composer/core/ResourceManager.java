@@ -1,12 +1,14 @@
 package org.composer.core;
 
 import org.springframework.jdbc.core.simple.SimpleJdbcDaoSupport;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.composer.beans.RDFEntity;
 import org.composer.utils.KeyGen;
 
 import java.io.*;
+import java.sql.Connection;
 
 import com.hp.hpl.jena.rdf.model.*;
 import com.hp.hpl.jena.db.DBConnection;
@@ -25,11 +27,12 @@ import javax.sql.DataSource;
  *
  * User:kboufelliga - Create Date: Sep 6, 2008 -
  */
-public final class ResourceManager extends SimpleJdbcDaoSupport {
+public final class ResourceManager {
     private static Log log = LogFactory.getLog(ResourceManager.class);
 
     private static final ResourceManager INSTANCE = new ResourceManager();
     private static EntityStore entityStore;
+    private static DataSource datasource;
 
     private Model model;
     private static String domainUrl = Properties.DEFAULT_URL.value()+Properties.DEFAULT_DOMAIN_URI.value();
@@ -45,6 +48,7 @@ public final class ResourceManager extends SimpleJdbcDaoSupport {
     private static String modelName = Properties.DEFAULT_MODEL_NAME.value();
 
     private static Publisher publisher;
+    private SingleConnectionDataSource dataSource;
 
     private ResourceManager() {
         ResourceManager.entityStore = EntityStore.INSTANCE;
@@ -53,6 +57,10 @@ public final class ResourceManager extends SimpleJdbcDaoSupport {
 
     public static ResourceManager getInstance() {
             return INSTANCE;
+    }
+
+    public static void setDataSource(DataSource datasource) {
+        ResourceManager.datasource = datasource;
     }
 
     public static void setDomain(String domainPrefix, String domainUri) {
@@ -296,13 +304,21 @@ public final class ResourceManager extends SimpleJdbcDaoSupport {
         search(resourceName,relationshipUrl+relationshipUri+"/property#userId",output);
         return output;
     }
+    private Connection getConnection() {
+        try {
+           return datasource.getConnection();
+        } catch (Exception e) {
+            log.error("failed to get datasource connection "+ e);
+        }
 
+        return null ;
+    }
 
     private Model getModel(String name) {
         ResourceManager.setModelName(name);
 
         if (model == null || !(name.equals(modelName))) {
-            IDBConnection dbconnection = new DBConnection(super.getConnection(),"PostgreSQL");
+            IDBConnection dbconnection = new DBConnection(getConnection(),"PostgreSQL");
             ModelMaker maker = ModelFactory.createModelRDBMaker(dbconnection);
 
             try {
@@ -313,5 +329,13 @@ public final class ResourceManager extends SimpleJdbcDaoSupport {
         }
 
         return model;
+    }
+
+    public void setDataSource(SingleConnectionDataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    public SingleConnectionDataSource getDataSource() {
+        return dataSource;
     }
 }

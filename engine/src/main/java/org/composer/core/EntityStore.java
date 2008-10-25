@@ -21,7 +21,7 @@ import java.util.*;
  */
 public enum EntityStore {
     INSTANCE;
-    private Log log = LogFactory.getLog(EntityStore.class);
+    private static Log log = LogFactory.getLog(EntityStore.class);
     private Map lookupCache;
     private final int LRU_SIZE = 250;
     private ObjectContainer database;

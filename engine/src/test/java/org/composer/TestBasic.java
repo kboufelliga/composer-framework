@@ -9,17 +9,8 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import com.db4o.ObjectContainer;
-
-import javax.sql.DataSource;
-import javax.naming.InitialContext;
 
 import junit.framework.TestCase;
-
-import java.util.Properties;
-import java.io.IOException;
-import java.io.FileInputStream;
 
 /**
  * Created by IntelliJ IDEA.
@@ -36,18 +27,15 @@ public class TestBasic extends TestCase {
 
     public TestBasic() {
         try {
-              //InitialContext ctxt = new InitialContext();
-            //DataSource ds = (DataSource) ctxt.lookup("kboufelliga/ds/Postgresql");
-
             BasicDataSource ds = new BasicDataSource();
-            Configuration config = new PropertiesConfiguration("datasource.properties");
+             Configuration config = new PropertiesConfiguration("datasource.properties");
 
             ds.setDriverClassName(config.getString("className"));
             ds.setUsername(config.getString("username"));
             ds.setPassword(config.getString("password"));
             ds.setUrl(config.getString("url"));
-            
-            resourceManager.setDataSource(ds);
+
+            ResourceManager.setDataSource(ds);
         } catch (Exception e) {
             log.error("datasource set up failed "+e);
         }
