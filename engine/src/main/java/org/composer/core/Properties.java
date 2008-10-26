@@ -83,6 +83,11 @@ public enum Properties {
                 return "/context";
             }
         },
+        DEFAULT_DATABASE_TYPE("Default Database Type") {
+            String value() {
+                return "PostgreSQL";
+            }
+        },
         DEFAULT_MODEL_NAME("Default Jena Model Name") {
             String value() {
                 return "prototype-0.1";

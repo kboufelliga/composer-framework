@@ -36,7 +36,11 @@ public class TestSpring {
     public void setDataSource(DataSource datasource) {
         ResourceManager.setDataSource(datasource);
     }
-    
+
+    public void setDatabaseType(String databaseType) {
+        ResourceManager.setDatabaseType(databaseType);
+    }
+
     public void testQuery() {
         resourceManager.search("register",new ByteArrayOutputStream());
     }

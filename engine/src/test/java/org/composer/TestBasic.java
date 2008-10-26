@@ -36,6 +36,10 @@ public class TestBasic extends TestCase {
             ds.setUrl(config.getString("url"));
 
             ResourceManager.setDataSource(ds);
+
+            if (config.getString("databaseType") != null) {
+                ResourceManager.setDatabaseType(config.getString("databaseType"));
+            }
         } catch (Exception e) {
             log.error("datasource set up failed "+e);
         }

@@ -7,12 +7,13 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 import java.io.OutputStream;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import java.net.URI;
+
+import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.PropertiesConfiguration;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,14 +42,22 @@ public class RESTManager {
     private ResourceManager resourceManager = ResourceManager.getInstance();
 
     public RESTManager() {
-        InitialContext initialContext;
-        DataSource dataSource;
-        try {
-            initialContext = new InitialContext();
-            dataSource = (DataSource)initialContext.lookup("java:comp/env/jdbc/database");
-            resourceManager.setDataSource(dataSource);
-        } catch (NamingException e) {
-            log.error("DataSource Exception: "+e.toString());
+         try {
+            BasicDataSource ds = new BasicDataSource();
+            Configuration config = new PropertiesConfiguration("datasource.properties");
+
+            ds.setDriverClassName(config.getString("className"));
+            ds.setUsername(config.getString("username"));
+            ds.setPassword(config.getString("password"));
+            ds.setUrl(config.getString("url"));
+
+            ResourceManager.setDataSource(ds);
+
+            if (config.getString("databaseType") != null) {
+                ResourceManager.setDatabaseType(config.getString("databaseType"));
+            }
+        } catch (Exception e) {
+            log.error("datasource set up failed "+e);
         }
 
     }

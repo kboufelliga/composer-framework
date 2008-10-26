@@ -1,6 +1,5 @@
 package org.composer.core;
 
-import org.springframework.jdbc.core.simple.SimpleJdbcDaoSupport;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,6 +32,7 @@ public final class ResourceManager {
     private static final ResourceManager INSTANCE = new ResourceManager();
     private static EntityStore entityStore;
     private static DataSource datasource;
+    private static String databaseType = Properties.DEFAULT_DATABASE_TYPE.value();
 
     private Model model;
     private static String domainUrl = Properties.DEFAULT_URL.value()+Properties.DEFAULT_DOMAIN_URI.value();
@@ -61,6 +61,10 @@ public final class ResourceManager {
 
     public static void setDataSource(DataSource datasource) {
         ResourceManager.datasource = datasource;
+    }
+
+    public static void setDatabaseType(String dbType) {
+        ResourceManager.databaseType = dbType;
     }
 
     public static void setDomain(String domainPrefix, String domainUri) {
@@ -318,7 +322,7 @@ public final class ResourceManager {
         ResourceManager.setModelName(name);
 
         if (model == null || !(name.equals(modelName))) {
-            IDBConnection dbconnection = new DBConnection(getConnection(),"PostgreSQL");
+            IDBConnection dbconnection = new DBConnection(getConnection(),databaseType);
             ModelMaker maker = ModelFactory.createModelRDBMaker(dbconnection);
 
             try {

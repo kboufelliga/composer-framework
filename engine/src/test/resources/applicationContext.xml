@@ -22,6 +22,7 @@
 
     <bean id="main" class="org.composer.TestSpring">
         <property name="dataSource" ref="dataSource" />
+        <property name="databaseType" value="PostgreSQL"/>
     </bean>
 
     <!-- aspects -->
