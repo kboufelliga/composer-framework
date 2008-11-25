@@ -1,6 +1,6 @@
-**/*.db
-**/*applicationContext.xml
-**/*.properties
+*.db
+applicationContext.xml
+*.properties
 *.svn
 *.iml
 **/target
