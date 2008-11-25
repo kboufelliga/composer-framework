@@ -1,0 +1,6 @@
+host=SMTP_HOST
+port=SMTP_PORT
+ssl.factory=javax.net.ssl.SSLSocketFactory
+username=SMTP_USER
+password=SMTP_USER_PASSWORD
+

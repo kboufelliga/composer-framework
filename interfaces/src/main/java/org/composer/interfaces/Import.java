@@ -2,6 +2,7 @@ package org.composer.interfaces;
 
 import com.hp.hpl.jena.vocabulary.RDF;
 
+import javax.sql.DataSource;
 import java.io.File;
 import java.io.InputStream;
 
@@ -13,5 +14,5 @@ import java.io.InputStream;
  * To change this template use File | Settings | File Templates.
  */
 public interface Import {
-    public RDF read(InputStream input);
+    public void database(String databaseName, String databaseType);
 }

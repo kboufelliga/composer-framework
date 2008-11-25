@@ -12,9 +12,12 @@
 	
 	<modules>
 		<module>interfaces</module>
+		<module>exceptions</module>
 		<module>engine</module>
 		<module>communication</module>
+		<module>server</module>
 		<module>services</module>
+		<module>client</module>
 	</modules>
 
 </project>

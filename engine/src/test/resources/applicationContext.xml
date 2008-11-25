@@ -19,21 +19,20 @@
 	</bean>
 
     <!-- application components -->
-
-    <bean id="main" class="org.composer.TestSpring">
+    <bean id="main" class="org.composer.engine.TestSpring">
         <property name="dataSource" ref="dataSource" />
         <property name="databaseType" value="PostgreSQL"/>
     </bean>
 
     <!-- aspects -->
-	<bean id="monitorAspect" class="org.composer.aspects.Logging" />
-    <bean id="annotationManager" class="org.composer.aspects.ResourceDomain" />
+	<bean id="monitorAspect" class="org.composer.engine.aspects.Logging" />
+    <bean id="annotationManager" class="org.composer.engine.aspects.ResourceDomain" />
 
     <bean id="dataSource" class="org.springframework.jdbc.datasource.SingleConnectionDataSource" destroy-method="destroy">
             <property name="driverClassName" value="org.postgresql.Driver"/>
-            <property name="url" value="jdbc:postgresql://localhost:5432/composer"/>
-            <property name="username" value="composer"/>
-            <property name="password" value="composer1111"/>
+            <property name="url" value="jdbc:postgresql://localhost:5444/sandbox"/>
+            <property name="username" value="sandbox"/>
+            <property name="password" value="sandbox1111"/>
             <property name="autoCommit" value="true"/>
             <property name="suppressClose" value="true"/>
         </bean>

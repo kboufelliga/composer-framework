@@ -5,7 +5,6 @@ import com.sun.sgs.app.*;
 import java.io.Serializable;
 import java.util.Properties;
 import java.util.Vector;
-import java.util.ArrayList;
 
 /**
  * Created by IntelliJ IDEA.

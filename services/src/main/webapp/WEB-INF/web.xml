@@ -1,7 +1,5 @@
-<!DOCTYPE web-app PUBLIC
- "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
- "http://java.sun.com/dtd/web-app_2_3.dtd" >
-
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
 <web-app>
     <display-name>Archetype Created Web Application</display-name>
 
@@ -39,19 +37,53 @@
         <servlet-name>ComposerJersey</servlet-name>
         <servlet-class>com.sun.jersey.impl.container.servlet.ServletAdaptor</servlet-class>
         <load-on-startup>1</load-on-startup>
-    </servlet>
+        <run-as>
+            <role-name>demos</role-name>
+        </run-as>
+        </servlet>
 
     <servlet-mapping>
         <servlet-name>ComposerJersey</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
 
-    <resource-ref>
-            <description>Database Reference</description>
-            <res-ref-name>jdbc/database</res-ref-name>
-            <res-type>javax.sql.DataSource</res-type>
-            <res-auth>Container</res-auth>
-    </resource-ref>
-</web-app>
+    <security-constraint>
+        <display-name>Composer Security</display-name>
+        <web-resource-collection>
+            <web-resource-name>Default</web-resource-name>
+            <description/>
+            <url-pattern>/*</url-pattern>
+            <http-method>GET</http-method>
+            <http-method>POST</http-method>
+            <http-method>HEAD</http-method>
+            <http-method>PUT</http-method>
+            <http-method>OPTIONS</http-method>
+            <http-method>TRACE</http-method>
+            <http-method>DELETE</http-method>
+        </web-resource-collection>
+
+        
+
+        <auth-constraint>
+            <description>Composer Security</description>
+            <role-name>users</role-name>
+            <role-name>demos</role-name>
+            </auth-constraint>
+        </security-constraint>
 
 
+  <login-config>
+    <auth-method>BASIC</auth-method>
+    <realm-name>authentication</realm-name>
+  </login-config>
+
+<security-role>
+    <description/>
+    <role-name>users</role-name>
+</security-role>
+
+    <security-role>
+        <description/>
+        <role-name>demos</role-name>
+    </security-role>
+    </web-app>

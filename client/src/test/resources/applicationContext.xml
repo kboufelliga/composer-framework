@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+
+	<!-- enable annotation-based bean configuration -->
+	<context:annotation-config />
+
+	<!-- enable AspectJ annotations -->
+	<aop:aspectj-autoproxy />
+
+	<!-- load application properties -->
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="ignoreResourceNotFound" value="true" />
+	</bean>
+
+    <!-- application components -->
+    <bean id="main" class="org.composer.TestSpring">
+        <property name="dataSource" ref="dataSource" />
+        <property name="databaseType" value="PostgreSQL"/>
+    </bean>
+
+    <!-- aspects -->
+	<bean id="monitorAspect" class="org.composer.aspects.Logging" />
+    <bean id="annotationManager" class="org.composer.aspects.ResourceDomain" />
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.SingleConnectionDataSource" destroy-method="destroy">
+            <property name="driverClassName" value="org.postgresql.Driver"/>
+            <property name="url" value="jdbc:postgresql://localhost:5444/sandbox"/>
+            <property name="username" value="sandbox"/>
+            <property name="password" value="sandbox1111"/>
+            <property name="autoCommit" value="true"/>
+            <property name="suppressClose" value="true"/>
+        </bean>
+
+</beans>
