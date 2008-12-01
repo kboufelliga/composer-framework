@@ -126,18 +126,20 @@
         <artifactId>maven-jetty-plugin</artifactId>
                 <configuration>
                     <jettyConfig>${basedir}/config/jetty.xml</jettyConfig>
-                            <connectors>
+                    <connectors>
                             <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
                             <port>9111</port>
                             <maxIdleTime>60000</maxIdleTime>
                         </connector>
                     </connectors>
+
                     <userRealms>
-            <userRealm implementation="org.mortbay.jetty.plus.jaas.JAASUserRealm">
-              <name>userauthn</name>
-              <LoginModuleName>composer</LoginModuleName>
-            </userRealm>
-          </userRealms>
+                        <userRealm implementation="org.mortbay.jetty.plus.jaas.JAASUserRealm">
+                            <name>userauthn</name>
+                            <LoginModuleName>composer</LoginModuleName>
+                        </userRealm>
+                    </userRealms>
+
                     <webAppConfig>
                        <contextPath>/services</contextPath>
                        <compactPath>true</compactPath>

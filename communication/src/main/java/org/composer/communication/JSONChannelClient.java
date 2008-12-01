@@ -1,7 +1,6 @@
 package org.composer.communication;
 
 import com.sun.sgs.app.*;
-import com.sun.sgs.nio.channels.Channels;
 
 import java.io.Serializable;
 import java.util.Vector;

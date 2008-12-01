@@ -2,12 +2,8 @@ package org.composer.engine.utils;
 
 import org.composer.interfaces.Import;
 import org.composer.engine.transforms.TableToRDF;
-import com.hp.hpl.jena.vocabulary.RDF;
 
-import java.io.InputStream;
-import java.io.FileInputStream;
 
-import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.Platform;
@@ -15,7 +11,6 @@ import org.apache.ddlutils.PlatformFactory;
 
 import javax.sql.DataSource;
 
-import sun.tools.javap.Tables;
 
 
 /**

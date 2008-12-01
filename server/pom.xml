@@ -29,17 +29,13 @@
             <url>http://download.java.net/maven/2</url>
 	    </repository>
         <repository>
-            <id>orfjackal</id>
-            <url>http://repo.orfjackal.net/maven2</url>
-        </repository>
-        <repository>
             <id>tupelo2</id>
             <name>tupelo2</name>
             <url>http://dlt-dev.ncsa.uiuc.edu/m2</url>
         </repository>
     </repositories>
 
-	<dependencies>
+   <dependencies>
         <dependency>
             <groupId>org.composer</groupId>
             <artifactId>engine</artifactId>
@@ -303,4 +299,11 @@
             </plugin>
 		</plugins>
 	</build>
+<distributionManagement>
+    <repository>
+      <id>snapshots</id>
+      <name>Snapshots</name>
+      <url>http://maven.composerlab.org/content/repositories/snapshots</url>
+    </repository>
+  </distributionManagement>
 </project>

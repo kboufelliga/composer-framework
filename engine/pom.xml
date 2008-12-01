@@ -29,10 +29,6 @@
             <url>http://download.java.net/maven/2</url>
 	    </repository>
         <repository>
-            <id>orfjackal</id>
-            <url>http://repo.orfjackal.net/maven2</url>
-        </repository>
-        <repository>
             <id>tupelo2</id>
             <name>tupelo2</name>
             <url>http://dlt-dev.ncsa.uiuc.edu/m2</url>
