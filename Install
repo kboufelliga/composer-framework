@@ -22,7 +22,8 @@ II) Testing the service
 
 1) Start the service from the ../composer-framework/services directory as follows:
 
-mvn jetty:run-war -Djava.security.auth.login.config=/usr/local/composer/services/config/login.conf
+mvn jetty:run-war -Djava.security.auth.login.config=/usr/local/composer/services/config/login.confi(**)
+(**) MAKE SURE THAT THE DIRECTORY IS IN THE CLASSPATH OTHERWISE IT WILL NOT WORK 
 
 2) Run the client tests
 - make the proper modifications to the user and password in the test classes accordingly with the entries in the login.properties file 
