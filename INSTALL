@@ -1,0 +1,40 @@
+Installation and Configuration
+
+I) Configuring the server
+
+1) Services
+- Edit ../composer-framework/services/config/login.conf and provide the exact path for where the login.conf file exists (create it if you don't have one) . The login.conf file contains the jetty configuration for the realm. I am currently using a property file for simplicity(a sample file is provided in the same config directory). 
+
+- Edit the web.xml file in the ../composer-framework/services/src/main/webapp/WEB-INF directory and set up your desired access controls etc..
+
+- Create property files from the samples provided in the directories:
+> ../composer-framework/services/src/main/resources
+> Test > ../composer-framework/services/src/test/resources 
+
+
+2) Engine
+Create property files from the samples provided in the directories:
+> ../composer-framework/engine/src/main/resources/...
+> ../composer-framework/engine/config/...
+> Test > ../composer-framework/engine/src/test/resources/...
+
+II) Testing the service
+
+1) Start the service from the ../composer-framework/services directory as follows:
+
+mvn jetty:run-war -Djava.security.auth.login.config=/usr/local/composer/services/config/login.confi(**)
+(**) MAKE SURE THAT THE DIRECTORY IS IN THE CLASSPATH OTHERWISE IT WILL NOT WORK 
+
+2) Run the client tests
+- make the proper modifications to the user and password in the test classes accordingly with the entries in the login.properties file 
+
+- run the tests 
+
+NOTE: If you make any changes to the hostname and port of your service make sure to apply those changes to your test classes
+
+3) Client
+To use the client simply add a dependency to your maven pom.xml file. The client is completely independent from the server and engine and is more of a reference implementation.
+
+4) Server
+The server is more like an abstraction for using the engine. You can think of it as the body for hosting the engine. I have implemented some basic examples such as an "Application Server" or a "Membership Server" to illustrate how to make use of the engine. These servers applications can then be extended as services such as the RESTManager.
+ 

@@ -1,0 +1,23 @@
+How to get started with git
+
+-- install git 
+
+-- get a copy of the repository
+git clone git@github:kboufelliga@composer-framework.git
+
+-- create a branch
+git branch name (could be your name or desired branch name)
+
+-- after making changes
+git add .
+
+-- commit your changes locally
+git commit
+
+-- synch your branch with remote directory
+git push
+
+-- tag a milestone
+git tag V1
+
+-- more to come
