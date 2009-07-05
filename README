@@ -18,6 +18,7 @@ GNU Library General Public License, version 2.0
 - Preamble - 
 _________________________________________________________________________________________
 
+<PRE>
 The composer framework was designed to organize and accelerate the software development of web applications in general.
 Some of the ideas and conceptions are not new and are more incorporated into one model as a result of past experience and needs to solve a long time annoyance I have had for many years. What is unique about the composer framework are two fundamental characteristics:
 1- Element for consolidation of knowledge through the sharing of common data structures across a network. This is completly different then the traditional DB model of development using localized and closed data structures. Again nothing new as there are many projects today concentrating in moving more toward the use of DHTs. Note that I do not use any DHT at this point as I have created a model more graph oriented. 
