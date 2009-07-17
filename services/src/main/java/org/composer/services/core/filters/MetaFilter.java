@@ -107,7 +107,7 @@ System.out.println("COOKIE VALUE: "+storeKey);
                 */
                 if (path.equalsIgnoreCase("store.registration")) {
                     //should get the query string store_key value or create a new one
-                    composer.addDatatore(storeKey,"public");
+                    composer.addDataStore(storeKey,"public");
 
                     register(res, storeKey);
                 } else {

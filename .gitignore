@@ -5,3 +5,4 @@ applicationContext.xml
 *.iml
 **/target
 .DS_Store
+.jsonhub.keys

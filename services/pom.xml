@@ -74,9 +74,9 @@
 
     <build>
         <finalName>${service.name}</finalName>
-        <filters>
+        <!--<filters>
             <filter>config/${env}.properties</filter>
-        </filters>
+        </filters>-->
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
