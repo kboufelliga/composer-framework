@@ -1,5 +1,0 @@
-databaseType=PostgreSQL
-className=org.postgresql.jdbc3.Jdbc3PoolingDataSource
-username=DBUSER_WITH_WRITE_PERMISSIONS
-password=DBUSER_PASSWORD
-url=jdbc:postgresql://DB_HOST:DB_PORT/DB_NAME
