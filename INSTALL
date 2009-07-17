@@ -1,40 +1,46 @@
 Installation and Configuration
 
-I) Configuring the server
+I) Compiling and starting the service
 
-1) Services
-- Edit ../composer-framework/services/config/login.conf and provide the exact path for where the login.conf file exists (create it if you don't have one) . The login.conf file contains the jetty configuration for the realm. I am currently using a property file for simplicity(a sample file is provided in the same config directory). 
+mvn clean install
+mvn tomcat:run
 
-- Edit the web.xml file in the ../composer-framework/services/src/main/webapp/WEB-INF directory and set up your desired access controls etc..
+This will start the service on port 8080
 
-- Create property files from the samples provided in the directories:
-> ../composer-framework/services/src/main/resources
-> Test > ../composer-framework/services/src/test/resources 
+II) Testing Meta Definition
+Let's create a creditcard data structure with the following properties:
+ name
+ number
+ expiration month
+ expiration year
+
+1) From the browser (ONLY FOR EXPERIMENTATION IT IS NOT INTENDED TO BE USED THIS WAY)
+http://localhost:8080/api/meta/creditcard.name
+> a page will prompts you to create that definition ... after creating a json array is returned
+http://localhost:8080/api/meta/creditcard.number
+> create after prompt
+http://localhost:8080/api/meta/creditcard.expiration.month
+> create after prompt
+http://localhost:8080/api/meta/creditcard.expiration.year
+
+then invoking http://localhost:8080/api/meta/creditcard will return the json array with all the properties.
 
 
-2) Engine
-Create property files from the samples provided in the directories:
-> ../composer-framework/engine/src/main/resources/...
-> ../composer-framework/engine/config/...
-> Test > ../composer-framework/engine/src/test/resources/...
+2) From the client
+            ApiClient api = new ApiClient
+                                .Builder("http://localhost",8080)
+                                .credentials("", "")
+                                .build();
 
-II) Testing the service
+           JSONArray rsnm = api.put("creditcard.name");
+           JSONArray rsnb = api.put("creditcard.number");
+           JSONArray rsem = api.put("creditcard.expiration.month");
+           JSONArray rsey = api.put("creditcard.expiration.year");
+           JSONArray rssc = api.put("creditcard.security.code");
 
-1) Start the service from the ../composer-framework/services directory as follows:
+           JSONArray credicard = api.get("creditcard");
 
-mvn jetty:run-war -Djava.security.auth.login.config=/usr/local/composer/services/config/login.confi(**)
-(**) MAKE SURE THAT THE DIRECTORY IS IN THE CLASSPATH OTHERWISE IT WILL NOT WORK 
+           System.out.println(creditcard.toString());
 
-2) Run the client tests
-- make the proper modifications to the user and password in the test classes accordingly with the entries in the login.properties file 
 
-- run the tests 
-
-NOTE: If you make any changes to the hostname and port of your service make sure to apply those changes to your test classes
-
-3) Client
-To use the client simply add a dependency to your maven pom.xml file. The client is completely independent from the server and engine and is more of a reference implementation.
-
-4) Server
-The server is more like an abstraction for using the engine. You can think of it as the body for hosting the engine. I have implemented some basic examples such as an "Application Server" or a "Membership Server" to illustrate how to make use of the engine. These servers applications can then be extended as services such as the RESTManager.
- 
+III) Testing Data Storage
