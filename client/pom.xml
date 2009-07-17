@@ -1,28 +1,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.composer</groupId>
-		<artifactId>framework</artifactId>
-		<version>0.1-SNAPSHOT</version>
-	</parent> 
 
 	<groupId>org.composer</groupId>
 	<artifactId>client</artifactId>
 	<packaging>jar</packaging>
-	<version>0.5-SNAPSHOT</version>
-	<name>Composer Framework Client</name>
+	<version>0.7-SNAPSHOT</version>
+	<name>COMPOSER RESTful DATA CLIENT</name>
 
     <repositories>
         <repository>
-                <id>composerlab-thirdparty</id>
+                <id>composerlab</id>
                 <name>Composer Third Party Repository</name>
-                <url>http://maven.composerlab.org/content/groups/public/</url>
+                <url>http://maven.composerlab.org/content/</url>
         </repository>                
-        <repository>
-                <id>jena-repo</id>
-                <name>Jena Repository</name>
-                <url>http://jena.hpl.hp.com/repo</url>
-        </repository>
         <repository>
             <id>maven2-repository.dev.java.net</id>
             <name>Java.net Repository for Maven</name>
@@ -31,11 +21,6 @@
     </repositories>
 
     <dependencies>
-        <dependency>
-            <groupId>org.composer</groupId>
-            <artifactId>exceptions</artifactId>
-            <version>0.5-SNAPSHOT</version>
-        </dependency>
         <dependency>
             <groupId>net.sf.json-lib</groupId>
             <artifactId>json-lib</artifactId>
@@ -57,6 +42,11 @@
 			<artifactId>commons-httpclient</artifactId>
 			<version>3.1</version>
 		</dependency>
+         <dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>1.4</version>
+		</dependency>
         <dependency>
              <groupId>javax.activation</groupId>
              <artifactId>activation</artifactId>
@@ -75,9 +65,24 @@
 		</dependency>
         <dependency>
             <groupId>rabbitmq</groupId>
-            <artifactId>client</artifactId>
-            <version>1.4.0</version>
+            <artifactId>client-java</artifactId>
+            <version>1.5.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.jasypt</groupId>
+            <artifactId>jasypt</artifactId>
+            <version>1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ibm.icu</groupId>
+            <artifactId>icu4j</artifactId>
+            <version>3.4.4</version>
+        </dependency>
+        <dependency>
+            <groupId>db4o</groupId>
+            <artifactId>db4o</artifactId>
+            <version>7.2</version>
+		</dependency>
     </dependencies>
 
 	<build>
