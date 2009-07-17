@@ -19,16 +19,17 @@ GNU Library General Public License, version 2.0
 _________________________________________________________________________________________
 
 The composer framework was designed to organize and accelerate the software development of 
-web applications in general. Some of the ideas and conceptions are not new and are more 
-incorporated into one model as a result of my past experiences and my needs to solve 
-long time annoyances I have had for many years. What is unique about the composer 
+web applications in general. Some of the ideas and conceptions are not new and come from 
+a combination needs and from the desires to simplifying and  solving annoyances 
+accumulated throughout the years. What is unique about the composer 
 framework are two fundamental characteristics:
 
 1- Element for consolidation of knowledge through the sharing of common data structures 
 across a network. This is completly different then the traditional DB model of development 
 using localized and closed data structures. Again nothing new as there are many projects 
-today concentrating in moving more toward the use of DHTs. Note that I do not use any DHT 
-at this point as I have created a model more graph oriented. 
+today concentrating in moving toward the use of DHTs as a replacement. Note that I do not 
+use any DHT at this point as I have created a graph oriented model I believe can serve the
+purpose well for now. 
 
 2- The second element is the development of applications through the composition of these 
 dynamic data structures as mentioned above. I have defined a very basic algorithm based on 
@@ -40,28 +41,28 @@ solution and its benefits. Assume we are starting 3 new projects and let us say 
 the projects will use certain common interfaces such as a member registration, a user 
 profile and some other important information. Also let us assume that the data persistence 
 layer is a database and that we have defined all the tables and object mappings to those 
-tables and installed them in all the 3 environments. Each project will define a way to 
-access and manage the different interactions with the data layer. In this traditional and 
-familiar method of development, the first limitation and annoyance is that all 3 projects 
-have 3 versions of the same classes to use in their libraries. If a change is done to one 
-table it will require all the accessors to be changed and synced in order not to break the 
-build (that is in the best case scenario when the organization practice is based on 
-continuous builds). 
+tables and installed them in all the 3 different environments. Each project will define a 
+way to access and manage the different interactions with the data layer. 
+In this traditional and familiar method of development, the first limitation and annoyance 
+is that all 3 projects have 3 versions of the same classes to use in their libraries. 
+If a change is done to one table it will require all the accessors to be changed and 
+synchronized in order not to break the build (that is in the best case scenario when the 
+organization practice is based on continuous builds). 
 While there are various effective solutions to this problem that have evolved throughout 
 many years in the best software development practices, the root of the problem has not been 
-addressed from a systemic point of view. This composer framework addresses that root 
+addressed from a systemic point of view. The composer framework addresses that root 
 problem by providing a solution focused primarily in addressing the definition, 
 persistence, communication, and transportation of these data information and their 
 structures. In particular the elimination of redundancies so that data structures can be 
-defined in ways that are each elements is independent and any addition or modification does 
-require dependencies for the other project when not required. In the case of the three 
-project the common objects, instead of building a library for each project containing the 
-respective classes, we will rather have a reference not to the class of the data but to the 
-property of the classes that will be used. So the difference with the classical approach is 
-that only required data is utilized while not necessarily stored locally. It is a more 
-dynamic approach. The structure and values are available on the network and the access is 
-more granular. The transport focusses on the necessary rather than the whole of information. 
-If I needed  just the customer id from the customer class why transport all the other information? 
+defined in ways where each element is independent and any addition or modification does not
+create dependencies limitations. 
+In the case of the three projects described above, in order to solve the problem of having 
+build and maintain 3 libraries we will rather have a reference not to the class of the data 
+but to the property of the classes that will be used. The difference with the classical 
+approach is that only required data is utilized while not necessarily stored centrally. 
+The structure and values are available on the network and the access is more granular. 
+The transport focusses on the necessary rather than the whole of information. 
+If I only needed the customer id from the customer class why transport all the other information? 
 
 -------------------------------------------------------------------------------------------
 - Disclaimer -
@@ -71,11 +72,11 @@ This is a work in progress.
 -------------------------------------------------------------------------------------------
 - Installation -
 -------------------------------------------------------------------------------------------
-
+Read the INSTALL file
 -------------------------------------------------------------------------------------------
 - Notes -
 -------------------------------------------------------------------------------------------
-
+Read the README file 
 -------------------------------------------------------------------------------------------
 - Modules -
 -------------------------------------------------------------------------------------------
