@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<tomcat-users>
+  <role rolename="users"/>
+  <role rolename="standard"/>
+  <role rolename="manager"/>
+  <role rolename="admin"/>
+  <user username="cafepress" password="cafe1111" roles="users"/>
+  <user username="admin" password="admin1111" roles="standard,manager,admin"/>
+</tomcat-users>

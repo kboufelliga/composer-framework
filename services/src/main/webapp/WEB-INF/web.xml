@@ -1,89 +1,35 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
-<web-app>
-    <display-name>Archetype Created Web Application</display-name>
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation=
+      "http://java.sun.com/xml/ns/j2ee
+      http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+      version="2.4">
+
+    <display-name>JSONHUB RESTful DATA SERVICE</display-name>
 
     <filter>
-        <filter-name>GzipFilter</filter-name>
-        <filter-class>org.mortbay.servlet.jetty.IncludableGzipFilter</filter-class>
-        <init-param>
-          <param-name>bufferSize</param-name>
-          <param-value>8192</param-value>
-        </init-param>
-        <init-param>
-          <param-name>minGzipSize</param-name>
-          <param-value>1024</param-value>
-        </init-param>
-        <init-param>
-          <param-name>userAgent</param-name>
-          <param-value>(?:Mozilla[^\(]*\(compatible;\s*+([^;]*);.*)|(?:.*?([^\s]+/[^\s]+).*)</param-value>
-        </init-param>
-        <init-param>
-          <param-name>cacheSize</param-name>
-          <param-value>1024</param-value>
-        </init-param>
-        <init-param>
-          <param-name>excludedAgents</param-name>
-          <param-value>MSIE 6.0</param-value>
-        </init-param>
+        <filter-name>MetaFilter</filter-name>
+            <filter-class>
+              org.composer.services.core.filters.MetaFilter
+            </filter-class>
     </filter>
-
     <filter-mapping>
-        <filter-name>GzipFilter</filter-name>
-        <url-pattern>/*</url-pattern>
+        <filter-name>MetaFilter</filter-name>
+        <url-pattern>/meta/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
     </filter-mapping>
 
-    <servlet>
-        <servlet-name>ComposerJersey</servlet-name>
-        <servlet-class>com.sun.jersey.impl.container.servlet.ServletAdaptor</servlet-class>
-        <load-on-startup>1</load-on-startup>
-        <run-as>
-            <role-name>demos</role-name>
-        </run-as>
-        </servlet>
+    <filter>
+        <filter-name>DataFilter</filter-name>
+            <filter-class>
+              org.composer.services.core.filters.DataFilter
+            </filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>DataFilter</filter-name>
+        <url-pattern>/data/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
 
-    <servlet-mapping>
-        <servlet-name>ComposerJersey</servlet-name>
-        <url-pattern>/*</url-pattern>
-    </servlet-mapping>
-
-    <security-constraint>
-        <display-name>Composer Security</display-name>
-        <web-resource-collection>
-            <web-resource-name>Default</web-resource-name>
-            <description/>
-            <url-pattern>/*</url-pattern>
-            <http-method>GET</http-method>
-            <http-method>POST</http-method>
-            <http-method>HEAD</http-method>
-            <http-method>PUT</http-method>
-            <http-method>OPTIONS</http-method>
-            <http-method>TRACE</http-method>
-            <http-method>DELETE</http-method>
-        </web-resource-collection>
-
-        
-
-        <auth-constraint>
-            <description>Composer Security</description>
-            <role-name>users</role-name>
-            <role-name>demos</role-name>
-            </auth-constraint>
-        </security-constraint>
-
-
-  <login-config>
-    <auth-method>BASIC</auth-method>
-    <realm-name>authentication</realm-name>
-  </login-config>
-
-<security-role>
-    <description/>
-    <role-name>users</role-name>
-</security-role>
-
-    <security-role>
-        <description/>
-        <role-name>demos</role-name>
-    </security-role>
-    </web-app>
+</web-app>

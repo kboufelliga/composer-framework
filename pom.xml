@@ -1,23 +1,26 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.composer</groupId>
-	<version>0.1-SNAPSHOT</version>
+	<version>0.9-SNAPSHOT</version>
 	<artifactId>framework</artifactId>
 	<packaging>pom</packaging>
-	<name>Composer Framework</name>
+	<name>JSON RESTful DATA</name>
 	
 	<modules>
-		<module>interfaces</module>
-		<module>exceptions</module>
 		<module>engine</module>
-		<module>communication</module>
 		<module>server</module>
 		<module>services</module>
-		<module>client</module>
+		<!--<module>deploy</module>-->
 	</modules>
+
+    <properties>
+	    <engine.version>0.9-SNAPSHOT</engine.version>
+	    <server.version>0.9-SNAPSHOT</server.version>
+	    <services.version>1.0-SNAPSHOT</services.version>
+	    <deploy.version>1.0-SNAPSHOT</deploy.version>
+	</properties>
+	
 
 </project>

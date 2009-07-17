@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+      "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap>
+
+ <insert id="new_cc_account_encrypted" parameterClass="com.cafepress.finance.dao.CCAccountEncryptedJSON">
+        insert into cpf_cc_account_encrypted_json (
+            account_id,
+            json_schema_name,
+            json_cc_encrypted,
+            is_primary,
+            is_premium_shop
+        ) values (
+            #accountId#,
+           #jsonSchemaName#,
+            #jsonCCEncrypted#,
+            #isPrimary#,
+            #isPremiumShop#
+        )
+    </insert>
+
+    <select id="get_cc_encrypted_byid" resultClass="java.lang.String">
+        select  json_cc_encrypted as value
+        from    cpf_cc_account_encrypted_json
+        where   account_id = #value:VARCHAR#
+    </select>
+
+    <delete id="delete_cc_account_encrypted">
+        delete from cpf_cc_account_encrypted_json
+        where account_id =  #value:VARCHAR#
+    </delete>
+
+    <insert id="new_json_schema" parameterClass="com.cafepress.finance.dao.JSONSchema">
+        insert into cpf_json_schema (
+            name,
+            data_fields,
+            data_types
+        ) values (
+            #name#,
+            #dataFields#,
+            #dataTypes#
+        )
+    </insert>
+
+    <select id="get_json_schema_byname" resultClass="com.cafepress.finance.dao.JSONSchema">
+        select  name as name,
+                data_fields as dataFields,
+                data_types as dataTypes,
+                last_update_date as lastUpdateDate
+          from  cpf_json_schema
+        where  name = #value#
+    </select>
+
+    <select id="count_json_schema_name" resultClass="java.lang.Integer">
+        select count(1)
+        from cpf_json_schema
+        where name = #value#
+    </select>
+
+    <delete id="delete_json_schema">
+        delete from cpf_json_schema
+        where name =  #value:VARCHAR#
+    </delete>
+</sqlMap>
