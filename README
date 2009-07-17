@@ -20,49 +20,40 @@ ________________________________________________________________________________
 
 The composer framework was designed to organize and accelerate the software development of 
 web applications in general. Some of the ideas and conceptions are not new and come from 
-a combination needs and from the desires to simplifying and  solving annoyances 
-accumulated throughout the years. What is unique about the composer 
+a combination of needs and desire to simplify and solve real limitations and annoyances 
+accumulated throughout years of software development. What is unique about the composer 
 framework are two fundamental characteristics:
 
-1- Element for consolidation of knowledge through the sharing of common data structures 
-across a network. This is completly different then the traditional DB model of development 
-using localized and closed data structures. Again nothing new as there are many projects 
-today concentrating in moving toward the use of DHTs as a replacement. Note that I do not 
-use any DHT at this point as I have created a graph oriented model I believe can serve the
-purpose well for now. 
+1- Element of consolidation of knowledge through the sharing of common data structures 
+across domains. This is completely different from the traditional development  
+using localized and data structures in closed environment. Again this is nothing new 
+as there are many projects today concentrating and promoting the use of DHTs as a 
+replacement. Note that I do not use any DHT at this point of time. Instead I have created 
+a graph oriented model I believe can serve the purpose well. 
 
 2- The second element is the development of applications through the composition of these 
-dynamic data structures as mentioned above. I have defined a very basic algorithm based on 
-the simple fact that given any data structure it can be represented through the definition 
-of 4 required elements: a name, a link, a reference, and an identity. 
+dynamic data structures mentioned above. I have defined a very basic algorithm based on 
+the simple fact that given any data structure it can be represented and defined in the form 
+of 4 elements: a name, a link, a reference, and an identity. 
 
 Following is a simple illustrating of the problem followed by an outline of the proposed 
-solution and its benefits. Assume we are starting 3 new projects and let us say that all 
-the projects will use certain common interfaces such as a member registration, a user 
-profile and some other important information. Also let us assume that the data persistence 
-layer is a database and that we have defined all the tables and object mappings to those 
-tables and installed them in all the 3 different environments. Each project will define a 
-way to access and manage the different interactions with the data layer. 
-In this traditional and familiar method of development, the first limitation and annoyance 
-is that all 3 projects have 3 versions of the same classes to use in their libraries. 
-If a change is done to one table it will require all the accessors to be changed and 
-synchronized in order not to break the build (that is in the best case scenario when the 
-organization practice is based on continuous builds). 
-While there are various effective solutions to this problem that have evolved throughout 
-many years in the best software development practices, the root of the problem has not been 
-addressed from a systemic point of view. The composer framework addresses that root 
-problem by providing a solution focused primarily in addressing the definition, 
-persistence, communication, and transportation of these data information and their 
+solution and its benefits. In a semi traditional way of shared development, data structures
+can be defined stored and accessed through a data layer involving databases and some 
+ORM library or object to data access layer. Regardless of the access any addition or 
+modification will require a maintenance of the impacted components. Although these are
+limitations and annoyances we have learned to live with, the root of the problem has never
+been truly addressed. On further observation in the nature of the root problem, we notice 
+other areas of improvement such as the granularity in the transport of full objects. 
+
+While there are various effective ways to alleviate these limitations which have evolved 
+throughout many years of best software development practices, the core problem has not been 
+addressed from a systemic point of view. The primary focus should be in addressing 
+the definition, persistence, communication, and transportation of these data information and their 
 structures. In particular the elimination of redundancies so that data structures can be 
 defined in ways where each element is independent and any addition or modification does not
-create dependencies limitations. 
-In the case of the three projects described above, in order to solve the problem of having 
-build and maintain 3 libraries we will rather have a reference not to the class of the data 
-but to the property of the classes that will be used. The difference with the classical 
-approach is that only required data is utilized while not necessarily stored centrally. 
-The structure and values are available on the network and the access is more granular. 
-The transport focusses on the necessary rather than the whole of information. 
-If I only needed the customer id from the customer class why transport all the other information? 
+create dependencies limitations.
+
+More details and information will be provided in terms of tutorials and hands on examples.
 
 -------------------------------------------------------------------------------------------
 - Disclaimer -
@@ -85,3 +76,4 @@ Read the README file
 2- Engine
 3- Server
 4- Services  
+
