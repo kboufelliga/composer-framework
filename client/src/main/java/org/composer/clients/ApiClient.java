@@ -12,7 +12,6 @@ import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 
 import java.util.List;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.httpclient.auth.AuthPolicy;
 import org.apache.commons.httpclient.methods.DeleteMethod;
@@ -78,8 +77,10 @@ public class ApiClient {
          ***/
 
         client = new HttpClient();
+
         List authPrefs = new ArrayList(2);
         authPrefs.add(AuthPolicy.BASIC);
+
         client.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, authPrefs);
 
     }
@@ -95,6 +96,14 @@ public class ApiClient {
         public Builder(String hostname, int port) {
             this.hostname = hostname;
             this.hostPort = port;
+
+            //by default open store for attached cooke
+            try {
+                open(hostname, port);
+            } catch (Exception e) {
+                //we should decide wether to throw a runtime exception or not;
+                log.fatal(e.toString());
+            }
         }
 
         public Builder store(String key, String type) {
@@ -116,9 +125,9 @@ public class ApiClient {
         }
     }
 
-    public JSONArray put(String path) throws Exception {
-        JSONArray result;
-        PutMethod method = new PutMethod(repoHostname+":"+repoHostPort+"/api/meta/"+path);
+    public JSONObject post(String path) throws Exception {
+        JSONObject result;
+        PostMethod method = new PostMethod(repoHostname+":"+repoHostPort+"/api/meta/"+path);
         method.getParams().setCookiePolicy(CookiePolicy.RFC_2109);
         method.setRequestHeader("Cookie", "jsonhub-store-key="+getStoreKey());
 
@@ -143,9 +152,16 @@ public class ApiClient {
 
         reader.close();
 
-        result = JSONArray.fromObject(cdata.toString());
+        System.out.println("PUT RESPONSE: "+cdata.toString());
+
+        result = JSONObject.fromObject(cdata.toString());
 
         method.releaseConnection();
+
+        System.out.println("PUT RESPONSE: "+result.getString(path));
+
+        if ("error".equals(result.optString("error")))
+            throw new GeneralException(result.getString("error"));
 
         return result;
     }
@@ -179,11 +195,14 @@ public class ApiClient {
 
         method.releaseConnection();
 
+        if ("error".equals(result.optString("error")))
+            throw new GeneralException(result.getString("error"));
+
         return result;
     }
 
-    public JSONArray get(String path) throws Exception {
-        JSONArray result;
+    public JSONObject get(String path) throws Exception {
+        JSONObject result;
         HttpMethod method = new GetMethod(repoHostname+":"+repoHostPort+"/api/meta/"+path);
         method.getParams().setCookiePolicy(CookiePolicy.RFC_2109);
         method.setRequestHeader("Cookie", "jsonhub-store-key="+getStoreKey());
@@ -209,17 +228,25 @@ public class ApiClient {
 
             System.out.println("get response: "+cdata.toString());
             
-            result = JSONArray.fromObject(cdata.toString());
+            result = JSONObject.fromObject(cdata.toString());
         }
 
         method.releaseConnection();
 
+        System.out.println("GET RESPONSE: "+result.getString(path));
+
+
+        if ("error".equals(result.optString("error")))
+            throw new GeneralException(result.getString("error"));
+
         return result;
     }
 
-    public String register() throws Exception {
-        JSONObject result = new JSONObject();
-        PutMethod method = new PutMethod(repoHostname+":"+repoHostPort+"/api/meta/store.registration");
+    public JSONObject register() throws Exception {
+        JSONObject result;
+        PostMethod method = new PostMethod(repoHostname+":"+repoHostPort+"/api/meta/store.registration");
+        method.getParams().setCookiePolicy(CookiePolicy.RFC_2109);
+        method.setRequestHeader("Cookie", "jsonhub-store-key="+getStoreKey());
 
         //client.getState().setCredentials(new AuthScope(null, repoHostPort, "authentication"), new UsernamePasswordCredentials(memberId, memberPassword));
 
@@ -244,7 +271,43 @@ public class ApiClient {
 
         method.releaseConnection();
 
-        return result.getString("jsonhub-store-key");
+        if ("error".equals(result.optString("error")))
+            throw new GeneralException(result.getString("error"));
+
+        return result;
+    }
+
+    private static JSONObject open(String host, int port) throws Exception {
+        JSONObject result;
+        PostMethod method = new PostMethod(host+":"+port+"/api/meta/store.open");
+
+        //client.getState().setCredentials(new AuthScope(null, repoHostPort, "authentication"), new UsernamePasswordCredentials(memberId, memberPassword));
+
+        //method.setDoAuthentication(true);
+
+        int statusCode = client.executeMethod(method);
+
+        if (statusCode != HttpStatus.SC_OK) {
+            System.err.println("Method failed: " +method.getStatusLine());
+        }
+
+        Reader reader = new InputStreamReader(method.getResponseBodyAsStream());
+        CharArrayWriter cdata = new CharArrayWriter();
+        char buf[] = new char[BUFFER_SIZE];
+        int ret;
+        while ((ret = reader.read(buf, 0, BUFFER_SIZE)) != -1)
+            cdata.write(buf, 0, ret);
+
+        reader.close();
+
+        result = JSONObject.fromString(cdata.toString());
+
+        method.releaseConnection();
+
+        if ("error".equals(result.optString("error")))
+            throw new GeneralException(result.getString("error"));
+
+        return result;
     }
 
     private String getStoreKey() {
@@ -260,9 +323,11 @@ public class ApiClient {
                         System.out.println("OBJDB STORE KEY VALUE: "+storeKey);
 
                 } else {
-                        this.storeKey = register();
+                        JSONObject jshubkey = register();
 
-                                               System.out.println("REGISTRATION STORE KEY VALUE: "+storeKey);
+                        this.storeKey = jshubkey.getString("store-key");
+
+                        System.out.println("REGISTRATION STORE KEY VALUE: "+storeKey);
 
                         store = new Store();
                         store.setName("jsonhub-store-key");

@@ -36,104 +36,60 @@ public class MetaFilter implements Filter {
         this.config = filterConfig;
         context = config.getServletContext();
         filterName = config.getFilterName();
-        composer = new Api("localhost", 3306, "composer", "composer", "cp1111");
 
+        composer = new Api("localhost", 3306, "composer", "composer", "cp1111");
     }
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest)request;
         HttpServletResponse res = (HttpServletResponse)response;
 
-        System.out.println(
-                    "URI: "+req.getRequestURI()+"\n"+
-                    "CONTEXT PATH: "+req.getContextPath()+"\n"+
-                    "HEADER NAMES: "+req.getHeaderNames().toString()+"\n"+
-                    "PATH TRANSLATED: "+req.getPathTranslated()+"\n"+
-                    "REQUEST URL: "+req.getRequestURL()+"\n"+
-                    "SERVLET PATH: "+req.getServletPath()+"\n"+
-                    "METHOD: "+req.getMethod()+"\n"+
-                    "REQUEST URL: "+req.getRequestURL()+"\n"+
-                    "(Reported by " + filterName + ".)");
-                //metadata(response, req.getServletPath());
-
+        /*** NOTE THAT FOR NOW ALL REQUESTS REQUIRE A KEY SET IN A COOKIE
+         *   THE CLIENT HANDLES ALL THAT LOGIC.
+         *   THIS IS A SHORT TERM LIMITATION.
+         ***/
         String path = req.getServletPath().substring(6);
         String fpath = formatPath(path);
 
+        System.out.println("received request path: " +fpath + " and method: "+ req.getMethod());
+        
         String storeKey = getStoreKey(req.getCookies());
-System.out.println("COOKIE VALUE: "+storeKey);
-        if (storeKey.equals("")) {
-            /*** NEW COOKIE ***/
-            Cookie cookie = setStoreKey();
 
-            res.addCookie(cookie);
+        if ("".equals(storeKey) && !("PUT".equals(req.getMethod()) && "store.registration".equalsIgnoreCase(fpath))) {
 
-            storeKey = cookie.getValue();
+            JSONObject jserror = new JSONObject();
+            jserror.put("error", "requires a store key");
 
-            /*** PROMPT USER TO OPEN A STORE***/
-            //should get the query string store_key value or create a new one
-            if (req.getMethod().equals("PUT") && fpath.equalsIgnoreCase("store.registration")) {
-                    composer.addDataStore(storeKey,"public");
-
-                    register(res, storeKey);
-            } else {
-                createStore(res,"");
-            }
+            error(res, jserror);
         } else {
 
-            /*** ADD DEFAULT META AND DATA STORES ***/
-            //composer.addDataStore(storeKey);
-            
-            
-            /*** GET=READ ***/
-            if (req.getMethod().equals("GET")) {
-                //composer.addDataStore(storeKey);
-
+            if ("GET".equals(req.getMethod())) {
                 String uplinks = composer.getUplinks(storeKey, fpath);
-           
+
                 if (uplinks.trim().equals("[]")) {
                     composer.addLink(storeKey, fpath);
-                    //createPrompt(res,fpath);
-                } //else {
-                    JSONArray jsonrs = JSONArray.fromObject(composer.getUplinks(storeKey, fpath));
-                    response(res, jsonrs);
-                //}
-            } else
-
-            /*** PUT=CREATE ***/
-            if (req.getMethod().equals("PUT")) {
-                /*** NOTE THAT THIS SHOULD BE HANDLED BY THE ACTION SERVLET
-                *   WE COULD CREATE AN ACTION MAP FILER SUCH AS
-                *   forward to /action/#{form action}
-                */
-                if (path.equalsIgnoreCase("store.registration")) {
-                    //should get the query string store_key value or create a new one
-                    composer.addDataStore(storeKey,"public");
-
-                    register(res, storeKey);
-                } else {
-                    composer.addLink(storeKey, fpath);
-                
-                    JSONArray jsonrs = JSONArray.fromObject(composer.getUplinks(storeKey, fpath));
-
-                    response(res, jsonrs);
                 }
+
+                JSONArray jsonrs = JSONArray.fromObject(composer.getUplinks(storeKey, fpath));
+                
+                JSONObject jsresp = new JSONObject();
+                jsresp.put(fpath, jsonrs);
+
+                response(res, jsresp);
             } else
-        
-            /*** DELETE=DELETE ***/
-            if (req.getMethod().equals("DELETE")) {
-                //Api.removeLink(storeKey, fpath);
+
+            if ("PUT".equals(req.getMethod())) {
             } else
 
-            /*** POST=UPDATE ***/
-            if (req.getMethod().equals("POST")) {
-
-                System.out.println("PROCESSING POST REQUEST: "+fpath);
-
+            if ("POST".equals(req.getMethod())) {
                 if ("store.registration".equalsIgnoreCase(fpath)) {
+                    Cookie cookie = setStoreKey();
 
-                    System.out.println("ADDING META STORE: "+fpath);
+                    res.addCookie(cookie);
 
-                    composer.addMetaStore(storeKey);
+                    storeKey = cookie.getValue();
+
+                    composer.addDataStore(storeKey,"public");
 
                     JSONObject jsonobj = new JSONObject();
                     jsonobj.put("store-key", storeKey);
@@ -142,19 +98,35 @@ System.out.println("COOKIE VALUE: "+storeKey);
 
                     response(res, jsonobj);
 
-                } else {
-                    String result = composer.addLink(storeKey, fpath);
+                } else
 
-                    System.out.println("ADDLINK RESPONSE: "+result);
+                if ("store.open".equalsIgnoreCase(fpath)) {
+                   composer.addDataStore(storeKey,"public");
 
-                    System.out.println("SENDING RESPONSE: "+composer.getUplinks(storeKey, fpath));
+                   JSONObject jsonobj = new JSONObject();
+                    jsonobj.put("store-key", storeKey);
 
-                    JSONArray jsonobj = JSONArray.fromObject(composer.getUplinks(storeKey, fpath));
+                    System.out.println("SENDING RESPONSE: "+jsonobj.toString());
+
                     response(res, jsonobj);
-                }
-                
-            } else {
+                } else {
+                    composer.addLink(storeKey, fpath);
 
+                    JSONArray jsonrs = JSONArray.fromObject(composer.getUplinks(storeKey, fpath));
+
+                    JSONObject jsresp = new JSONObject();
+                    jsresp.put(fpath, jsonrs);
+
+                    response(res, jsresp);
+                }
+
+            } else
+
+            if ("DELETE".equals(req.getMethod())) {
+               //Api.removeLink(storeKey, fpath);
+            }
+
+            else {
                 chain.doFilter(request,response);
             }
         }
@@ -163,90 +135,12 @@ System.out.println("COOKIE VALUE: "+storeKey);
     public void destroy() {
     }
 
-    private void createStore(ServletResponse response, String data) throws ServletException, IOException {
-        response.setContentType("text/html");
-
-        PrintWriter out = response.getWriter();
-
-        String docType =
-        "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 " +
-        "Transitional//EN\">\n";
-
-        out.println
-        (docType +
-           "<HTML>\n" +
-           "<HEAD><TITLE>COMPOSER API METADATA </TITLE></HEAD>\n" +
-           "<BODY BGCOLOR=\"WHITE\">\n" +
-           "<H1>JSONHUB METADATA</H1>\n" +
-           " need to create a store  <form method=\"POST\" action=\"/api/meta/store.registration\"><input type=\"submit\" value=\"Create\"/></form>\n" +
-           "</BODY></HTML>");
-    }
-
-    private void createPrompt(ServletResponse response, String data) throws ServletException, IOException {
-        response.setContentType("text/html");
-
-        PrintWriter out = response.getWriter();
-
-        String docType =
-        "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 " +
-        "Transitional//EN\">\n";
-
-        out.println
-        (docType +
-           "<HTML>\n" +
-           "<HEAD><TITLE>COMPOSER API METADATA </TITLE></HEAD>\n" +
-           "<BODY BGCOLOR=\"WHITE\">\n" +
-           "<H1>JSONHUB METADATA</H1>\n" +
-           data + " definition does not exists. <form method=\"POST\"><input type=\"submit\" value=\"Create\"/></form>\n" +
-           "</BODY></HTML>");
-    }
-
-    private void metadata(ServletResponse response, String data) throws ServletException, IOException {
-        response.setContentType("text/html");
-
-        PrintWriter out = response.getWriter();
-
-        String docType =
-        "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 " +
-        "Transitional//EN\">\n";
-
-        out.println
-        (docType +
-           "<HTML>\n" +
-           "<HEAD><TITLE>COMPOSER API METADATA DEFINITION</TITLE></HEAD>\n" +
-           "<BODY BGCOLOR=\"WHITE\">\n" +
-           "<H1>JSONHUB METADATA</H1>\n" +
-           ": " + data + "\n" +
-           "</BODY></HTML>");
-    }
-
-    private void response(ServletResponse response, JSONArray data) throws ServletException, IOException {
+    private void response(ServletResponse response, JSONObject data) throws ServletException, IOException {
         response.setContentType("application/json");
 
         PrintWriter out = response.getWriter();
         
         out.println(data);
-    }
-
-    private void response(ServletResponse response, JSONObject data) throws ServletException, IOException {
-        response.setContentType("application/json");
-
-        PrintWriter out = response.getWriter();
-
-        out.println(data);
-    }
-
-
-    private void register(ServletResponse response, String data) throws ServletException, IOException {
-        response.setContentType("application/json");
-
-        PrintWriter out = response.getWriter();
-
-        JSONObject jsonrs = new JSONObject();
-
-        jsonrs.put("jsonhub-store-key", data);
-
-        out.println(jsonrs);
     }
 
     private String getStoreKey (Cookie[] cookies) {
@@ -286,5 +180,13 @@ System.out.println("COOKIE VALUE: "+storeKey);
 
 
         return sb.toString();
+    }
+
+    private void error(ServletResponse response, JSONObject data) throws ServletException, IOException {
+        response.setContentType("application/json");
+
+        PrintWriter out = response.getWriter();
+
+        out.println(data);
     }
 }

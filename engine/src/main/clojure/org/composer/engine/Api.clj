@@ -254,7 +254,7 @@
   ([#^String store-key #^String pathlist]
      ;;should add validation to only allow certain delimiters
      (let [pl (.toLowerCase pathlist)
-	   lst (re-seq #"\w+" pl)]
+           lst (re-seq #"\w+" pl)]
        (letfn [(linkl [nm lt]
 		 (if (empty? lt)
 		   nm

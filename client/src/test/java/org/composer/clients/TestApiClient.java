@@ -5,6 +5,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import junit.framework.TestCase;
 import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 /**
  * Created by IntelliJ IDEA.
@@ -29,17 +30,19 @@ public class TestApiClient extends TestCase {
     public void testStorage() {
 
         try {
-           // run the test in a loop for
-           // 10 seconds
 
-           JSONArray rsnm = api.put("creditcard.name");
-           JSONArray rsnb = api.put("creditcard.number");
-           JSONArray rsem = api.put("creditcard.expiration.month");
-           JSONArray rsey = api.put("creditcard.expiration.year");
-           JSONArray rssc = api.put("creditcard.security.code");
+            // should have the option for one declaration such as
+            // api.put"credicard.[name,number,expiration.month,expiration.year,security.code]")
+           JSONObject rsnm = api.post("creditcard.name");
+           JSONObject rsnb = api.post("creditcard.number");
+           JSONObject rsem = api.post("creditcard.expiration.month");
+           JSONObject rsey = api.post("creditcard.expiration.year");
+           JSONObject rssc = api.post("creditcard.security.code");
 
-           JSONArray metalist = api.get("creditcard");
+           JSONObject metaobj = api.get("creditcard");
 
+           JSONArray metalist = metaobj.getJSONArray("creditcard");
+           
            Iterator<String> list = metalist.iterator();
            boolean foundnm = false;
            boolean foundnb = false;
@@ -87,17 +90,17 @@ public class TestApiClient extends TestCase {
 
             public void run() {
 
-            if (repeat > 0) {
-                System.out.println("Test# "+repeat);
+                if (repeat > 0) {
+                    System.out.println("Test# "+repeat);
 
-                testStorage();
+                    testStorage();
 
-                repeat--;
-            } else {
-                System.out.println("Completed Test Loop!");
+                    repeat--;
+                } else {
+                    System.out.println("Completed Test Loop!");
 
-                timer.cancel();
-            }
+                    timer.cancel();
+                }
             }
         };
 
@@ -108,7 +111,7 @@ public class TestApiClient extends TestCase {
         timer.schedule(task, 0, 1*1000);
 
         //Give it time to execute
-        Thread.sleep(4*1000);
+        Thread.sleep(5*1000);
     }
 
     @Override
