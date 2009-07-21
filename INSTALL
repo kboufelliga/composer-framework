@@ -23,7 +23,7 @@ http://localhost:8080/api/meta/creditcard.expiration.month
 > create after prompt
 http://localhost:8080/api/meta/creditcard.expiration.year
 
-then invoking http://localhost:8080/api/meta/creditcard will return the json array with all the properties.
+Calling http://localhost:8080/api/meta/creditcard will return the json array with all the properties.
 
 
 2) From the client
@@ -32,11 +32,11 @@ then invoking http://localhost:8080/api/meta/creditcard will return the json arr
                                 .credentials("", "")
                                 .build();
 
-           JSONArray rsnm = api.put("creditcard.name");
-           JSONArray rsnb = api.put("creditcard.number");
-           JSONArray rsem = api.put("creditcard.expiration.month");
-           JSONArray rsey = api.put("creditcard.expiration.year");
-           JSONArray rssc = api.put("creditcard.security.code");
+           JSONObject rsnm = api.post("creditcard.name");
+           JSONObject rsnb = api.post("creditcard.number");
+           JSONObject rsem = api.post("creditcard.expiration.month");
+           JSONObject rsey = api.post("creditcard.expiration.year");
+           JSONObject rssc = api.post("creditcard.security.code");
 
            JSONArray credicard = api.get("creditcard");
 
