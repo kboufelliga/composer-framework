@@ -14,13 +14,13 @@ import net.sf.json.JSONObject;
  * Time: 1:34:26 AM
  * To change this template use File | Settings | File Templates.
  */
-public class TestApiClient extends TestCase {
-    private ApiClient api;
+public class TestDataClient extends TestCase {
+    private DataClient api;
 
     @Override
     protected void setUp() {
-        
-        api = new ApiClient
+
+        api = new DataClient
                    .Builder("http://localhost",8080)
                    .credentials("", "")
                    .build();
@@ -32,20 +32,20 @@ public class TestApiClient extends TestCase {
         try {
 
             // should have the option for one declaration such as
-            // api.put"credicard.[name,number,expiration.month,expiration.year,security.code]")
+            // api.put"credicard...name,number,expiration.month,expiration.year,security.code")
 
-           /*
-           JSONObject rsnm = api.post("creditcard.name");
-           JSONObject rsnb = api.post("creditcard.number");
-           JSONObject rsem = api.post("creditcard.expiration.month");
-           JSONObject rsey = api.post("creditcard.expiration.year");
-           JSONObject rssc = api.post("creditcard.security.code");
-           */
-            
-           JSONObject metaobj = api.get("creditcard");
+           JSONObject rsnm = api.post("creditcard.name","additional abc name");
+           JSONObject rsnb = api.post("creditcard.number","15-1234567891011");
+           JSONObject rsem = api.post("creditcard.expiration.month","july-22");
+           JSONObject rsey = api.post("creditcard.expiration.year","2011");
+           JSONObject rssc = api.post("creditcard.security.code","928");
 
+           JSONObject dataobj = api.get("creditcard");
+
+           System.out.println("CREDITCARD DATA: "+dataobj.toString());
+/*
            JSONArray metalist = metaobj.getJSONArray("creditcard");
-           
+
            Iterator<String> list = metalist.iterator();
            boolean foundnm = false;
            boolean foundnb = false;
@@ -77,8 +77,8 @@ public class TestApiClient extends TestCase {
            assertTrue(foundnb);
            assertTrue(foundem);
            assertTrue(foundey);
-           assertTrue(foundsc);    
-           
+           assertTrue(foundsc);
+*/
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.toString());
@@ -89,7 +89,7 @@ public class TestApiClient extends TestCase {
         final Timer timer = new Timer();
 
         TimerTask task = new TimerTask() {
-            private int repeat = 5;
+            private int repeat = 0;
 
             public void run() {
 

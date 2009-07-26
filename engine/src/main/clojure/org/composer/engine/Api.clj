@@ -1,6 +1,7 @@
 (ns org.composer.engine.Api
 (:gen-class
   :methods [
+  #^{:static true} [loadStores [] String]
   #^{:static true} [addMetaStore [String] void]
   #^{:static true} [addMetaStore [String String] void]
   #^{:static true} [addDataStore [String] void]
@@ -25,8 +26,10 @@
   #^{:static true} [addData [String String String String] String]
   #^{:static true} [getData [String] String]
   #^{:static true} [getData [String String] String]
+  #^{:static true} [getData [String String String] String]
   #^{:static true} [removeData [String String] void]
   #^{:static true} [removeData [String String String] void]
+  #^{:static true} [removeData [String String String String] void]
    ]
   :state state
   :constructors {[String int String String String] []}
@@ -34,6 +37,7 @@
   (:use clojure.set clojure.contrib.json.write)
   (:import (java.util.regex.Matcher)
            (java.util.regex.Pattern)
+           (java.util.UUID)
            (org.composer.db.mysql.Manager)
            (org.composer.db.mysql.MetaManager)
            (org.composer.db.mysql.DataManager))
@@ -56,8 +60,8 @@
 
 (defmacro get-agent [agent-name & parms]
   (let [dbm# 'dbm
-         metam# 'metam
-         datam# 'datam]
+        metam# 'metam
+        datam# 'datam]
      `(if (= '~agent-name '~dbm#)
         (new org.composer.db.mysql.Manager ~@parms)
         (if (= '~agent-name '~metam#)
@@ -80,6 +84,18 @@
        (def db-agent (agent db-manager))
        (def meta-agent (agent meta-manager))
        (def data-agent (agent data-manager))))
+
+(defn isLink? [data-rec]
+  (if (= (:link data-rec) ".") true false))
+
+(defn isRef? [data-rec]
+  (let [link (str (first (:link data-rec)))]
+    (if (= link "@") true false)))
+
+(defn isRoot? [data-rec]
+  (if (and (= (:link data-rec) "=") (= (:reference data-rec) ".")) true false))
+
+(defn root [link] (let [lst (re-seq #"\w+" link)] (str (first lst))))
 
 (defn add-metastore
   "create store for member with key k and mode m (m can be 'public' 'private' or 'group')"
@@ -115,22 +131,22 @@
 
 (defmacro add-store [option persists & args]
   (let [option-meta# 'meta
-	option-data# 'data
-	persists-wi-db# 'with-db
-	persists-wo-db# 'without-db]
-	 `(if (= '~option '~option-meta#)
-	    (if (= '~persists '~persists-wo-db#)
-	      (add-metastore ~@args)
-	      (if (= '~persists '~persists-wi-db#)
-		(dosync (add-metastore-db ~@args) (add-metastore ~@args))
-		(jsonMsg "error" (str '~persists " is an invalid persistence type! [valid options: with-db, without-db]"))))
-	    (if (= '~option '~option-data#)
-	      (if (= '~persists '~persists-wo-db#)
-		(add-datastore ~@args)
-		(if (= '~persists '~persists-wi-db#)
-		  (dosync (add-datastore-db ~@args) (add-datastore ~@args))
-		  (jsonMsg "error" (str '~persists " is an invalid persistence type! [valid options: with-db, without-db]"))))
-	      (jsonMsg "error" (str '~option " is an invalid option! [valid options: meta, data]"))))))
+        option-data# 'data
+        persists-wi-db# 'with-db
+        persists-wo-db# 'without-db]
+        `(if (= '~option '~option-meta#)
+            (if (= '~persists '~persists-wo-db#)
+                (add-metastore ~@args)
+                (if (= '~persists '~persists-wi-db#)
+                    (dosync (add-metastore-db ~@args) (add-metastore ~@args))
+                    (jsonMsg "error" (str '~persists " is an invalid persistence type! [valid options: with-db, without-db]"))))
+            (if (= '~option '~option-data#)
+                (if (= '~persists '~persists-wo-db#)
+                    (add-datastore ~@args)
+                    (if (= '~persists '~persists-wi-db#)
+                        (dosync (add-datastore-db ~@args) (add-datastore ~@args))
+                        (jsonMsg "error" (str '~persists " is an invalid persistence type! [valid options: with-db, without-db]"))))
+                (jsonMsg "error" (str '~option " is an invalid option! [valid options: meta, data]"))))))
 
 (defn -addMetaStore
   "create store for member with key k and mode m (m can be 'public' 'private' or 'group')"
@@ -344,8 +360,7 @@
      (let [lnkl (.toLowerCase link)
 	   store (get-metastore store-key)]
        (union (reduce union (conj (get-uplinks store-key lnkl) (map #(:identity %) (composition-get store-key lnkl))))
-	      (reduce union (map #(get-uplinks store-key (reduce str (rest (:link %)))) (select #(= (str (first (:link %))) "@") (select #(= (:reference %) lnkl) @store))))))))
-
+	      (reduce union (map #(reduce union %) (map #(get-uplinks store-key (reduce str (rest (:link %)))) (select #(= (str (first (:link %))) "@") (select #(= (:reference %) lnkl) @store)))))))))
 
 (defn -getUplinks
   ([#^String link]
@@ -369,34 +384,25 @@
   ([#^String store-key #^String link #^String property]
      (compositions-by-id store-key (str link "." property))))
 
- (defn compositions-by-link
+(defn compositions-by-link
   ([#^String ref]
-     (compositions-by-link "general-public" ref))
+     (compositions-by-link "general_public" ref))
   ([#^String store-key #^String ref]
      (let [refl (.toLowerCase ref)
 	   store (get-metastore store-key)
 	   lnks (select #(= (:link %) ".") (select #(= (:reference %) refl) @store))
-	   root (if (.equals #^{:tag String} (down-link refl) "") (compositions-by-id store-key refl) nil)]
-       (if root (union root lnks) lnks)))
-  ([#^String store-key #^String ref #^String filter-id]
-     (let [refl (.toLowerCase ref)
-	   store (get-metastore store-key)]
-	   (select #(= (:link %) ".") (select #(= (:reference %) refl) (select #(= (:identity %) filter-id) @store))))))
+	   root (compositions-by-id store-key refl)]
+       (if (isRef? (first root)) lnks (union root lnks)))))
 
 (defn compositions-by-ref
-  ([#^String ref]
-     (compositions-by-ref "general-public" ref))
-  ([#^String store-key #^String ref]
-     (let [refl (.toLowerCase ref)
-	   link (str "@" refl)
+  ([#^String reference]
+     (compositions-by-ref "general_public" reference))
+  ([#^String store-key #^String reference]
+     (let [refl (.toLowerCase reference)
 	   store (get-metastore store-key)
-	   refs (select #(and (not (= (:link %) "@schema")) (.equals (str (first (:link %))) "@")) (select #(= (:reference %) refl) @store))]
-       refs))
-  ([#^String store-key #^String ref #^String filter-id]
-     (let [refl (.toLowerCase ref)
-	   store (get-metastore store-key)
-	   refs (select #(and (not (= (:link %) "@schema")) (.equals (str (first (:link %))) "@")) (select #(= (:reference %) refl) (select #(= (:identity %) filter-id) @store)))]
-       refs)))
+	   refs (select #(and (not (= (:link %) "@schema")) (.equals (str (first (:link %))) "@")) (select #(= (:reference %) refl) @store))
+	   root (compositions-by-id store-key refl)]
+       (if (isRef? (first root)) (union root refs) refs))))
 
 (defn add-ref
   ([#^String store-key #^String ref #^String target-ref #^String property]
@@ -426,6 +432,7 @@
 	       (compose-meta with-db store-key property (str "@" ref)  target-ref (str target-ref "." property))
 	       (jsonMsg "warning" "identity already exists")
 	       )))))))
+
 
 (defn schema-set
   ([#^String link #^String property #^String requirement]
@@ -537,124 +544,141 @@
 		(jsonMsg "error" (str '~persists " is an invalid persistence type! [valid options: with-db, without-db]"))))))
 
 (defn data-by-link
-  ([#^String link]
-     (data-by-link "general-public" link))
-  ([#^String store-key #^String link]
+  ([#^String data-key #^String link]
+     (data-by-link "general_public" data-key link))
+  ([#^String store-key #^String data-key #^String link]
      (let [lnkl (.toLowerCase link)
 	   store (get-datastore store-key)
-	   data (select #(= (:reference %) "=") (select #(= (:link %) lnkl) @store))]
-       (str lnkl ":[" (:identity (first data)) (reduce str (map #(str "," (:identity %)) (rest data))) "]"))))
+	   data (select #(= (:reference %) data-key) (select #(= (:link %) lnkl) @store))]
+       data)))
 
 (defn data-by-ref
-  ([#^String link #^String reference]
-     (data-by-ref "general-public" link reference))
-  ([#^String store-key #^String link #^String reference]
+  ([#^String data-key #^String link]
+     (data-by-ref "general_public" data-key link))
+  ([#^String store-key #^String data-key #^String link]
      (let [lnkl (.toLowerCase link)
-	   refl (.toLowerCase reference)
+	   metadata (first (compositions-by-id store-key lnkl))
+	   reference (str data-key (:link metadata))
 	   store (get-datastore store-key)
-	   data (select #(= (:reference %) lnkl) (select #(= (:link %) refl) @store))]
-       (str refl ":[" (:identity (first data)) (reduce str (map #(str "," (:identity %)) (rest data))) "]"))))
+	   data (select #(= (:reference %) reference) (select #(= (:link %) lnkl) @store))]
+       data)))
 
-(defn add-data
-  ([#^String store-key #^String link #^String data]
+(defn data-by-link-json
+  ([#^String link]
+     (data-by-link-json "general_public" "general_public" link))
+  ([#^String store-key #^String link]
+     (data-by-link-json store-key store-key link))
+  ([#^String store-key #^String data-key #^String link]
+     (let [lnkl (.toLowerCase link)
+	   store (get-datastore store-key)
+	   data (select #(= (:reference %) data-key) (select #(= (:link %) lnkl) @store))]
+       (str "\"" lnkl "\":[" (reduce str (interpose "," (map #(json-str (:identity %)) data))) "]"))))
+
+(defn data-by-ref-json
+  ([#^String data-key #^String link]
+     (data-by-ref-json "general_public" data-key link))
+  ([#^String store-key #^String data-key #^String link]
+     (let [lnkl (.toLowerCase link)
+	   metadata (first (compositions-by-id store-key lnkl))
+	   reference (str data-key (:link metadata))
+	   store (get-datastore store-key)
+	   data (select #(= (:reference %) reference) (select #(= (:link %) lnkl) @store))]
+       (str "\"" lnkl "\":[" (reduce str (interpose "," (map #(json-str (:identity %)) data))) "]"))))
+
+(defn add-data-wid
+  ([#^String store-key #^String data-key #^String link #^String data]
      (let [lnklst (re-seq #"\w+" link)
 	   property (last lnklst)]
        (if (= (count lnklst) 1)
-	 (add-data store-key "=" property data)
-	 (add-data store-key (reduce str (interpose "."(drop-last lnklst))) property data))))
-  ([#^String store-key #^String link #^String property #^String data]
+	 (add-data-wid store-key data-key "=" property data)
+	 (add-data-wid store-key data-key (reduce str (interpose "."(drop-last lnklst))) property data))))
+  ([#^String store-key #^String data-key #^String link #^String property #^String data]
      ;; check the lnk has one value
      (let [lnkl (.toLowerCase link)
 	   propl (.toLowerCase property)
 	   refl (if (.equals lnkl "=") "." (str lnkl "." propl))
 	   store (get-metastore store-key)
 	   metadata (select #(= (:name %) propl) (select #(= (:reference %) lnkl) @store))
-	   link-type (first (:link (first metadata)))]
-
+	   root-name (root lnkl)
+	   root-key (data-by-link store-key data-key root-name)
+	   link-type (str (first (:link (first metadata))))]
+       ;; should be in a transaction
+       (if (and (empty? root-key) (not (.equals link-type "="))) (compose-storedata with-db store-key root-name root-name data-key data-key))
        ;; make sure the meta-data is not a reference
-       (if (.equals (str link-type) "@")
-		(dosync (compose-storedata with-db store-key propl (:identity (first metadata)) (:link (first metadata)) data)
-			(compose-storedata with-db store-key propl (apply str (rest (:link (first metadata)))) "=" data))
-		(if (.equals (str link-type) ".")
-		  (compose-storedata with-db store-key (:name (first metadata)) (:identity (first metadata)) "=" data)
-		  (if  (.equals (str link-type) "=")
-		    (compose-storedata with-db store-key propl propl link-type data)
-		    (jsonMsg "error" (json-str (str lnkl " does not exists!")))))))))
+       (if (.equals link-type "@")
+		(dosync (compose-storedata with-db store-key propl (:identity (first metadata)) (str data-key (:link (first metadata))) data)
+			(compose-storedata with-db store-key propl (apply str (rest (:link (first metadata)))) data-key data))
+		(if (.equals link-type ".")
+		  (compose-storedata with-db store-key (:name (first metadata)) (:identity (first metadata)) data-key data)
+		  (if  (.equals link-type "=")
+		    (compose-storedata with-db store-key propl propl data-key data)
+		    (jsonMsg "error" (json-str (str lnkl " does not exists!"))))))) (jsonMsg "data-key" (json-str data-key))))
+
+(defn add-data-noid
+    ([#^String store-key #^String link #^String data]
+       (let [data-key (str (java.util.UUID/randomUUID))]
+	 (add-data-wid store-key data-key link data)))
+    ([#^String store-key #^String link #^String property #^String data]
+       (let [data-key (str (java.util.UUID/randomUUID))]
+	 (add-data-wid store-key data-key link property data))))
+
+(defmacro add-data [option & args]
+  (let [option-wi-id# 'with-id
+	option-wo-id# 'without-id]
+	 `(if (= '~option '~option-wi-id#)
+	      (add-data-wid ~@args)
+	      (if (= '~option '~option-wo-id#)
+	      	  (add-data-noid ~@args)
+		  (jsonMsg "error" (str '~option " is not a valid option! [valid options are: with-id, without-id]"))))))
 
 (defn -addData
   ([#^String store-key #^String link #^String data]
-     (add-data store-key link data))
-  ([#^String store-key #^String link #^String property #^String data]
-     (add-data store-key link property data)))
+     (add-data with-id store-key store-key link data))
+  ([#^String store-key #^String data-key #^String link #^String data]
+     (add-data with-id store-key data-key link data)))
 
+(defn get-data-json
+  ([#^String data-key #^String link]
+     (get-data-json "general_public" data-key link))
+  ([#^String store-key #^String data-key #^String link]
+     (let [lnkl (.toLowerCase link)]
+	   (str "{" (reduce str (interpose "," 
+					   (union
+					    (map #(data-by-link-json store-key data-key (:identity %)) (compositions-by-link store-key lnkl))
+					    (map #(data-by-ref-json store-key data-key (:identity %)) (compositions-by-ref store-key lnkl))))) "}"))))
 (defn -getData
   ([#^String link]
      (-getData "general-public" link))
   ([#^String store-key #^String link]
-     (let [lnkl (.toLowerCase link)
-	   store (get-datastore store-key)
-	   #^{:tag String} dlnk (down-link lnkl)
-	   lnks (union (compositions-by-link store-key lnkl) (if (not (.equals dlnk "")) (compositions-by-link store-key dlnk lnkl) nil))
-	   refs (union (compositions-by-ref store-key lnkl) (if (not (.equals dlnk "")) (compositions-by-ref store-key dlnk lnkl) nil))]
-       (if (and (not (empty? refs)) (not (empty? lnks)))
-	       (jsonMsg "object" (reduce str (interpose "," (union
-		                  (map #(data-by-link store-key (:identity %)) lnks)
-				  (map #(data-by-ref store-key (:link %) (:identity %)) refs)))))
-	       (if-not (empty? refs)
-		       (jsonMsg "object" (reduce str (interpose "," (map #(data-by-ref store-key (:link %) (:identity %)) refs))))
-		       (if-not (empty? lnks)
-			       (jsonMsg "object" (reduce str (interpose "," (map #(data-by-link store-key (:identity %)) lnks))))))))))
-
-(defn remove-data [store-key link data]
-  ;; if link has refs then remove applies to the refs as well
-  (let [lnkl (.toLowerCase link)
-	   store (get-datastore store-key)
-	   lnks-data (select #(= (:reference %) "=") (select #(= (:identity %) data) (select #(= (:link %) lnkl) @store)))
-	   refs-data (select #(.equals (str (first (:reference %))) "@") (select #(= (:identity %) data ) (select #(= (:link %) lnkl) @store)))
-	   lnks-refs (select #(= (:reference %) (str "@" lnkl)) (select #(= (:identity %) data) @store))]
-       (if (and (not (empty? lnks-data)) (not (empty? lnks-refs)))
-	       ;; we need to check if there are references we need to delete as well
-	 (doseq [item (union lnks-data lnks-refs)] (dosync (send store disj item)))
-	 (if-not (empty? lnks-data)
-		 (doseq [item lnks-data] (dosync (send store disj item)))
-		 (if-not (empty? refs-data)
-			 (doseq [item refs-data] (dosync (send store disj item)))
-			 (jsonMsg "error" (str lnkl "/" data " ... not found!")))))))
+    (-getData store-key store-key link))
+  ([#^String store-key #^String data-key #^String link]
+     (get-data-json store-key data-key link)))
 
 (defn delete-data-db [store-key name link reference identity]
   (send-off data-agent (fn [datamngr] (.delete datamngr store-key name link reference identity) datamngr))
   (if (agent-errors data-agent) (do (clear-agent-errors data-agent) false) true))
 
-(defn remove-data-db [store-key link data]
+(defn remove-data [store-key data-key link data]
   ;; if link has refs then remove applies to the refs as well
   (let [lnkl (.toLowerCase link)
-	   store (get-datastore store-key)
-	   lnks-data (select #(= (:reference %) "=") (select #(= (:identity %) data) (select #(= (:link %) lnkl) @store)))
-	   refs-data (select #(.equals (str (first (:reference %))) "@") (select #(= (:identity %) data ) (select #(= (:link %) lnkl) @store)))
-	   lnks-refs (select #(= (:reference %) (str "@" lnkl)) (select #(= (:identity %) data) @store))]
-       (if (and (not (empty? lnks-data)) (not (empty? lnks-refs)))
-	       ;; we need to check if there are references we need to delete as well
-	 (doseq [item (union lnks-data lnks-refs)] (dosync (send store disj item) (delete-data-db store-key (:name item) (:link item) (:reference item) (:identity item))))
-	 (if-not (empty? lnks-data)
-		 (doseq [item lnks-data] (dosync (send store disj item) (delete-data-db store-key (:name item) (:link item) (:reference item) (:identity item))))
-		 (if-not (empty? refs-data)
-			 (doseq [item refs-data] (dosync (send store disj item) (delete-data-db store-key (:name item) (:link item) (:reference item) (:identity item))))
-			 (jsonMsg "error" (str lnkl "/" data " ... not found!")))))))
-
-(defmacro remove-storedata [option & args]
-  (let [option-wi-db# 'with-db
-	option-wo-db# 'without-db]
-	 `(if (= '~option '~option-wo-db#)
-	      (remove-data ~@args)
-	      (if (= '~option '~option-wi-db#)
-		(remove-data-db ~@args)
-		(jsonMsg "error" (str '~option " is an invalid option! [valid options: with-db, without-db]"))))))
+	store (get-datastore store-key)
+	identity (first (compositions-by-id store-key lnkl))]
+    (if (isRef? identity)
+      (let [refs-data (select #(= (:reference %) (str data-key (:link identity))) (select #(= (:identity %) data ) (select #(= (:link %) lnkl) @store)))]
+	(if-not (empty? refs-data) (doseq [item refs-data] (dosync (send store disj item) (delete-data-db store-key (:name item) (:link item) (:reference item) (:identity item)))) (jsonMsg "error" (str lnkl "/" data " ... not found!"))))
+      (if (or (isLink? identity) (isRoot? identity))
+	(let [lnks-data (select #(= (:reference %) data-key) (select #(= (:identity %) data) (select #(= (:link %) lnkl) @store)))
+	      refs-data (select #(= (:reference %) (str data-key "@" lnkl)) (select #(= (:identity %) data) @store))]
+	  (if-not (empty? lnks-data) (doseq [item (union lnks-data refs-data)] (dosync (send store disj item) (delete-data-db store-key (:name item) (:link item) (:reference item) (:identity item)))) (jsonMsg "error" (str lnkl "/" data " ... not found!"))))
+	(jsonMsg "error" (str lnkl "/" data " ... not found!"))))))
 
 (defn -removeData
   ([#^String link #^String data]
-     (-removeData "general-public" link data))
+     (-removeData "general_public" "general_public" link data))
   ([#^String store-key #^String link #^String data]
-     (remove-storedata with-db store-key link data)))
+     (-removeData store-key store-key link data))
+  ([#^String store-key #^String data-key #^String link #^String data]
+     (remove-data store-key data-key link data)))
 
 (defn init-store-db [store]
   (let [datastore? (:data_store store)
@@ -664,21 +688,31 @@
       (add-store data without-db store-key store-type)
       (add-store meta without-db store-key store-type))))
 
-(defn init-store-data [store-key]
-  (let [data-set (.read db-manager store-key)]
+(defn init-metadata [store-key]
+  (let [data-set (.read meta-manager store-key)]
+    (when-not (empty? data-set)
+      (doseq [recd data-set]
+	(compose-meta without-db store-key (:name recd) (:link recd) (:reference recd) (:identity recd))))))
+
+(defn init-storedata [store-key]
+  (let [data-set (.read data-manager store-key)]
     (when-not (empty? data-set)
       (doseq [recd data-set]
 	(compose-storedata without-db store-key (:name recd) (:link recd) (:reference recd) (:identity recd))))))
 
-;;(defn load-stores [] (send-off db-agent (fn [dbmngr] (map #(init-store-db dbmngr %) (.getStoresMap dbmngr)) dbmngr)))
-(defn load-stores [] (map #(init-store-db %) (.getStoresMap db-manager)))
-(defn load-stores-data [] (map #(init-store-data (:key %)) @datastore-map))
+(defn load-stores [] (dorun (map #(init-store-db %) (.getStoresMap db-manager))) (str (count @metastore-map)))
+(defn load-stores-meta [] (dorun (map #(init-metadata (:store_key %)) (.getStoresMap db-manager))) (str (count @metastore-map)))
+(defn load-stores-data [] (dorun (map #(init-storedata (:key %)) @datastore-map)) (str (count @datastore-map)))
+
+(defn -loadStores []
+  (str "stores loaded: " (load-stores) " plus metadata loaded: " (load-stores-meta) " and data loaded: " (load-stores-data)))
+
 
 (defn -constructor [host port dbname user password]
   [ []
-    ;;(load-db-agents host port dbname user password)
-    (load-stores)
-    (load-stores-data)
+    (load-db-agents host port dbname user password)
+    ;;(load-stores)
+    ;;(load-stores-data)
    ])
 
 (defn -addRef
@@ -691,10 +725,14 @@
   ([#^String link]
      (data-by-link link))
   ([#^String store-key #^String link]
-     (data-by-link store-key link)))
+     (data-by-link store-key link))
+  ([#^String store-key #^String data-key #^String link]
+     (data-by-link store-key data-key link)))
 
 (defn -dataByRef
-  ([#^String link #^String reference]
-     (data-by-ref link reference))
-  ([#^String store-key #^String link #^String reference]
-     (data-by-ref store-key link reference)))
+  ([#^String link]
+     (data-by-ref link))
+  ([#^String store-key #^String link]
+     (data-by-ref store-key link))
+  ([#^String store-key #^String data-key #^String link]
+     (data-by-ref store-key data-key link)))

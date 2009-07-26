@@ -160,7 +160,7 @@ public class ApiClient {
 
         System.out.println("PUT RESPONSE: "+result.getString(path));
 
-        if ("error".equals(result.optString("error")))
+        if (result.has("error"))
             throw new GeneralException(result.getString("error"));
 
         return result;
@@ -195,7 +195,7 @@ public class ApiClient {
 
         method.releaseConnection();
 
-        if ("error".equals(result.optString("error")))
+        if (result.has("error"))
             throw new GeneralException(result.getString("error"));
 
         return result;
@@ -236,7 +236,7 @@ public class ApiClient {
         System.out.println("GET RESPONSE: "+result.getString(path));
 
 
-        if ("error".equals(result.optString("error")))
+        if (result.has("error"))
             throw new GeneralException(result.getString("error"));
 
         return result;
@@ -271,7 +271,7 @@ public class ApiClient {
 
         method.releaseConnection();
 
-        if ("error".equals(result.optString("error")))
+        if (result.has("error"))
             throw new GeneralException(result.getString("error"));
 
         return result;
@@ -304,7 +304,7 @@ public class ApiClient {
 
         method.releaseConnection();
 
-        if ("error".equals(result.optString("error")))
+        if (result.has("error"))
             throw new GeneralException(result.getString("error"));
 
         return result;

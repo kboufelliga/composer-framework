@@ -28,7 +28,8 @@ public class MetaFilter implements Filter {
     protected FilterConfig config;
     private ServletContext context;
     private String filterName;
-    private static String REGEX = "\\s+|/+";
+    private static String SP_REGEX = "\\s+|/+";
+    //private static String GP_REGEX = "(\w.[(\w,+)*])";
     private static String REPLACE = ".";
     private static Api composer;
 
@@ -38,6 +39,7 @@ public class MetaFilter implements Filter {
         filterName = config.getFilterName();
 
         composer = new Api("localhost", 3306, "composer", "composer", "cp1111");
+        System.out.println("COMPOSER LOADING STORES RESULT: " + composer.loadStores());
     }
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -166,7 +168,7 @@ public class MetaFilter implements Filter {
 
     private String formatPath(String uri) {
 
-        Pattern p = Pattern.compile(REGEX);
+        Pattern p = Pattern.compile(SP_REGEX);
 
         Matcher m = p.matcher(uri);
         
