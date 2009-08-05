@@ -325,7 +325,7 @@ public class ApiClient {
                 } else {
                         JSONObject jshubkey = register();
 
-                        this.storeKey = jshubkey.getString("store-key");
+                        this.storeKey = jshubkey.getString("storeKey");
 
                         System.out.println("REGISTRATION STORE KEY VALUE: "+storeKey);
 

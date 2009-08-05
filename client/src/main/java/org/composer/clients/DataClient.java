@@ -96,14 +96,6 @@ public class DataClient {
         public Builder(String hostname, int port) {
             this.hostname = hostname;
             this.hostPort = port;
-
-            //by default open store for attached cooke
-            try {
-                open(hostname, port);
-            } catch (Exception e) {
-                //we should decide wether to throw a runtime exception or not;
-                log.fatal(e.toString());
-            }
         }
 
         public Builder store(String key, String type) {
@@ -136,8 +128,7 @@ public class DataClient {
         //method.setDoAuthentication(true);
 
         method.setParameter("data", data);
-        //method.setRequestBody(path);
-
+        
         int statusCode = client.executeMethod(method);
 
         if (statusCode != HttpStatus.SC_OK) {
@@ -321,7 +312,7 @@ public class DataClient {
                 } else {
                         JSONObject jshubkey = register();
 
-                        this.storeKey = jshubkey.getString("store-key");
+                        this.storeKey = jshubkey.getString("storeKey");
 
                         System.out.println("REGISTRATION STORE KEY VALUE: "+storeKey);
 

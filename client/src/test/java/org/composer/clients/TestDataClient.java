@@ -43,42 +43,31 @@ public class TestDataClient extends TestCase {
            JSONObject dataobj = api.get("creditcard");
 
            System.out.println("CREDITCARD DATA: "+dataobj.toString());
-/*
-           JSONArray metalist = metaobj.getJSONArray("creditcard");
 
-           Iterator<String> list = metalist.iterator();
+           assertTrue(dataobj.has("creditcard.name"));
+           assertTrue(dataobj.has("creditcard.number"));
+           assertTrue(dataobj.has("creditcard.expiration"));
+           assertTrue(dataobj.has("creditcard.expiration.month"));
+           assertTrue(dataobj.has("creditcard.expiration.year"));
+           assertTrue(dataobj.has("creditcard.security"));
+           assertTrue(dataobj.has("creditcard.security.code"));
+
+
+           JSONArray datalist = dataobj.getJSONArray("creditcard.name");
+
+           Iterator<String> list = datalist.iterator();
            boolean foundnm = false;
-           boolean foundnb = false;
-           boolean foundem = false;
-           boolean foundey = false;
-           boolean foundsc = false;
-
+           
            while (list.hasNext()) {
-               String prop = list.next();
+               String value = list.next();
 
-               if (prop.equals("creditcard.name")) {
+               if (value.equals("additional abc name")) {
                    foundnm = true;
-               }
-               if (prop.equals("creditcard.number")) {
-                   foundnb = true;
-               }
-               if (prop.equals("creditcard.expiration.month")) {
-                   foundem = true;
-               }
-               if (prop.equals("creditcard.expiration.year")) {
-                   foundey = true;
-               }
-               if (prop.equals("creditcard.security.code")) {
-                   foundsc = true;
                }
            }
 
            assertTrue(foundnm);
-           assertTrue(foundnb);
-           assertTrue(foundem);
-           assertTrue(foundey);
-           assertTrue(foundsc);
-*/
+           
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.toString());

@@ -7,6 +7,50 @@
       version="2.4">
 
     <display-name>JSONHUB RESTful DATA SERVICE</display-name>
+    
+    <servlet>
+        <servlet-name>JSONHUBJersey</servlet-name>
+
+        <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+
+        <init-param>
+            <param-name>com.sun.jersey.config.property.resourceConfigClass</param-name>
+            <param-value>com.sun.jersey.api.core.PackagesResourceConfig</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>com.sun.jersey.config.property.packages</param-name>
+            <param-value>org.composer.services.core</param-value>
+        </init-param>
+
+        <load-on-startup>1</load-on-startup>
+
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>JSONHUBJersey</servlet-name>
+        <url-pattern>/public/stores</url-pattern>
+    </servlet-mapping>
+    
+    <!--<servlet>
+        <servlet-name>JSONHUBJersey</servlet-name>
+        <servlet-class>com.sun.jersey.spi.spring.container.servlet.SpringServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>JSONHUBJersey</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
+    
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>WEB-INF/applicationContext.xml</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>-->
 
     <filter>
         <filter-name>MetaFilter</filter-name>
@@ -32,4 +76,6 @@
         <dispatcher>REQUEST</dispatcher>
     </filter-mapping>
 
+    
+    
 </web-app>

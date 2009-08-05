@@ -6,6 +6,7 @@
 	    [deleteMetaStore [String] String]
 	    [deleteDataStore [String] String]
 	    [getStoresMap [] clojure.lang.LazySeq]
+	    [getPublicStores [] clojure.lang.LazySeq]
 	    ]
    :state state
    :init constructor
@@ -184,5 +185,10 @@
 
 (defn #^{:tag clojure.lang.LazySeq} -getStoresMap [this]
   (let [query "SELECT * FROM storesmap"]
+    (with-connection db
+		     (with-query-results rs [query] (doall rs)))))
+
+(defn #^{:tag clojure.lang.LazySeq} -getPublicStores [this]
+  (let [query "SELECT * FROM storesmap WHERE store_type = 'public'"]
     (with-connection db
 		     (with-query-results rs [query] (doall rs)))))

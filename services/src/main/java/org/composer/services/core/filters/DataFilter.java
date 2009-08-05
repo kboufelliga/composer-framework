@@ -65,12 +65,8 @@ public class DataFilter implements Filter {
 
             if ("GET".equals(req.getMethod())) {
 
-                System.out.println("STORE KEY: "+storeKey);
+                JSONObject jsonrs = JSONObject.fromObject(composer.getData(storeKey, fpath));
 
-                JSONObject jsonrs = new JSONObject();
-
-                jsonrs.put("data", composer.getData(storeKey, fpath));
-                 
                 response(res, jsonrs);
             } else
 
@@ -108,18 +104,14 @@ public class DataFilter implements Filter {
                 } else {
                     try {
 
-                         String resp = composer.addData(storeKey, fpath, getData(request));
-
-                         JSONObject rstate = JSONObject.fromObject();
+                         JSONObject rstate = JSONObject.fromObject(composer.addData(storeKey, fpath, getData(request)));
 
                          JSONObject jsonrs;
 
                         if (rstate.containsKey("error"))
                             jsonrs = jsonMsg("error", "could not add data to "+fpath+" ERROR DESC: "+rstate.getString("error"));
                         else {
-                             System.out.println("DATA INFO: "+composer.getData(storeKey, fpath));
-                            jsonrs = new JSONObject();
-                            jsonrs.put("data", composer.getData(storeKey, fpath));
+                            jsonrs = JSONObject.fromObject(composer.getData(storeKey, fpath));
                         }
                         
                         response(res, jsonrs);

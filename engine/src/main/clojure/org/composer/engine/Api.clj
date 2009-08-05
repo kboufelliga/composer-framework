@@ -14,6 +14,7 @@
   #^{:static true} [getUplinks [String String] String]
   #^{:static true} [addRef [String String String String] void]
   #^{:static true} [addRef [String String String] void]
+  #^{:static true} [getPublicStores [] String]
 
 ;;-------------------------------------------------------------------------------------------------------------------------------------
 ;; DATA
@@ -433,7 +434,6 @@
 	       (jsonMsg "warning" "identity already exists")
 	       )))))))
 
-
 (defn schema-set
   ([#^String link #^String property #^String requirement]
      (schema-set "general-public" link property requirement))
@@ -637,6 +637,13 @@
   ([#^String store-key #^String data-key #^String link #^String data]
      (add-data with-id store-key data-key link data)))
 
+(defn get-all-data-json
+  ([#^String data-key #^String link]
+     (get-all-data-json "general_public" data-key link))
+  ([#^String store-key #^String data-key #^String link]
+     (let [lnkl (.toLowerCase link)]
+       (str "{" (reduce str (interpose "," (map #(data-by-link-json store-key data-key %) (get-uplinks* store-key lnkl)))) "}"))))
+
 (defn get-data-json
   ([#^String data-key #^String link]
      (get-data-json "general_public" data-key link))
@@ -652,7 +659,7 @@
   ([#^String store-key #^String link]
     (-getData store-key store-key link))
   ([#^String store-key #^String data-key #^String link]
-     (get-data-json store-key data-key link)))
+     (get-all-data-json store-key data-key link)))
 
 (defn delete-data-db [store-key name link reference identity]
   (send-off data-agent (fn [datamngr] (.delete datamngr store-key name link reference identity) datamngr))
@@ -679,6 +686,8 @@
      (-removeData store-key store-key link data))
   ([#^String store-key #^String data-key #^String link #^String data]
      (remove-data store-key data-key link data)))
+
+(defn -getPublicStores [] (str "{ \"storeKeys\":[" (reduce str (interpose "," (map #(json-str (:store_key %)) (.getPublicStores db-manager)))) "]}"))
 
 (defn init-store-db [store]
   (let [datastore? (:data_store store)

@@ -94,7 +94,7 @@ public class MetaFilter implements Filter {
                     composer.addDataStore(storeKey,"public");
 
                     JSONObject jsonobj = new JSONObject();
-                    jsonobj.put("store-key", storeKey);
+                    jsonobj.put("storeKey", storeKey);
 
                     System.out.println("SENDING RESPONSE: "+jsonobj.toString());
 
